@@ -243,6 +243,8 @@ body {
 .bm-row label { flex: 1; cursor: pointer; }
 .bm-pct   { font-size: 11px; color: #888; min-width: 28px; text-align: right; }
 .bm-slider { width: 100%; height: 4px; accent-color: #4caf50; cursor: pointer; }
+.bm-cs-sel-row { padding: 2px 0 3px; }
+.bm-cs-sel { width: 100%; font-size: 12px; padding: 3px 4px; border: 1px solid #ccc; border-radius: 4px; background: #fff; color: #1e4d2b; cursor: pointer; }
 
 /* ─── GPSログコントロール ─── */
 .track-ctrl { display: flex; flex-direction: column; gap: 4px; }

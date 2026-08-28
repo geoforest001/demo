@@ -78,19 +78,38 @@ const gsiAirPhoto = L.tileLayer(
 gsiStandard.addTo(map);
 gsiAirPhoto.addTo(map); gsiAirPhoto.setOpacity(0);
 
-/* CS立体図（config で URL が設定されている場合のみ追加） */
-let gsiRelief = null;
+/* ─── CS立体図プリセット（公的機関提供のみ）─── */
+const CS_PRESETS = [
+  { label: '長野県',     url: 'https://tile.geospatial.jp/CS/VER2/{z}/{x}/{y}.png',                              maxNativeZoom: 17, attr: '<a href="https://www.geospatial.jp/ckan/dataset/nagano-csmap">長野県CS立体図（G空間情報センター）</a>' },
+  { label: '栃木県',     url: 'https://rinya-tochigi.geospatial.jp/2023/rinya/tile/csmap/{z}/{x}/{y}.png',        maxNativeZoom: 17, attr: '<a href="https://www.geospatial.jp/ckan/dataset/rinya-tochigi-csmap">林野庁×G空間情報センター</a>' },
+  { label: '福島県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_fukushima/{z}/{x}/{y}.png',               maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '兵庫県',     url: 'https://rinya-hyogo.geospatial.jp/2023/rinya/tile/csmap/{z}/{x}/{y}.png',          maxNativeZoom: 17, attr: '<a href="https://www.geospatial.jp/ckan/dataset/rinya-hyogo-csmap">林野庁×G空間情報センター</a>' },
+  { label: '高知県',     url: 'https://rinya-kochi.geospatial.jp/2023/rinya/tile/csmap/{z}/{x}/{y}.png',          maxNativeZoom: 17, attr: '<a href="https://www.geospatial.jp/ckan/dataset/rinya-kochi-csmap">林野庁×G空間情報センター</a>' },
+  { label: '広島県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_hiroshima/{z}/{x}/{y}.png',               maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '岡山県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_okayama/{z}/{x}/{y}.png',                 maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '愛媛県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_ehime/{z}/{x}/{y}.png',                   maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '熊本・大分', url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_kumamoto_oita/{z}/{x}/{y}.png',           maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '能登地域',   url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_noto/{z}/{x}/{y}.png',                   maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+];
+/* config.js で csRelief が設定されていれば先頭に追加 */
 if (_cfg.csRelief) {
-  const csAttr = _cfg.csReliefAttribution || gsiAttribution;
-  gsiRelief = L.tileLayer(_cfg.csRelief, {
-    attribution: csAttr,
-    maxNativeZoom: _cfg.csReliefMaxNativeZoom || 17,
+  CS_PRESETS.unshift({ label: '設定済み（config）', url: _cfg.csRelief, maxNativeZoom: _cfg.csReliefMaxNativeZoom || 17, attr: _cfg.csReliefAttribution || gsiAttribution });
+}
+
+let _csReliefLayer = null;
+let _csReliefOpacity = 0.7;
+
+function _switchCsRelief(preset) {
+  if (_csReliefLayer) { map.removeLayer(_csReliefLayer); _csReliefLayer = null; }
+  if (!preset) return;
+  _csReliefLayer = L.tileLayer(preset.url, {
+    attribution: preset.attr || gsiAttribution,
+    maxNativeZoom: preset.maxNativeZoom || 17,
     maxZoom: 22,
-    className: "bm-multiply",
-    opacity: 0.7,
+    className: 'bm-multiply',
+    opacity: _csReliefOpacity,
   });
-  gsiRelief.addTo(map);
-  gsiRelief.setOpacity(0);
+  _csReliefLayer.addTo(map);
 }
 
 /* ─── 林種の色定義 ─── */
@@ -341,9 +360,6 @@ function renderLayerControl() {
     { id: 'bmStd', label: '地理院標準地図', layer: gsiStandard, defVal: 1.0 },
     { id: 'bmAir', label: '航空写真',       layer: gsiAirPhoto, defVal: 0.0 },
   ];
-  if (gsiRelief) {
-    bmDefs.push({ id: 'bmRlf', label: 'CS立体図', layer: gsiRelief, defVal: 0.0 });
-  }
   bmDefs.forEach(def => {
     const item   = document.createElement('div'); item.className = 'bm-item';
     const row    = document.createElement('div'); row.className  = 'bm-row';
@@ -364,6 +380,53 @@ function renderLayerControl() {
     chk.addEventListener('change', function() { applyBm(this.checked ? (parseFloat(slider.value) || 1.0) : 0); });
     slider.addEventListener('input', function() { applyBm(parseFloat(this.value)); });
   });
+
+  /* ── CS立体図（都道府県ドロップダウン）── */
+  (function() {
+    const item = document.createElement('div'); item.className = 'bm-item';
+    const row  = document.createElement('div'); row.className  = 'bm-row';
+    const chk  = document.createElement('input'); chk.type = 'checkbox'; chk.id = 'bmCs';
+    const lbl  = document.createElement('label'); lbl.setAttribute('for', 'bmCs'); lbl.textContent = 'CS立体図';
+    const pct  = document.createElement('span'); pct.className = 'bm-pct'; pct.id = 'bmCsPct'; pct.textContent = Math.round(_csReliefOpacity * 100) + '%';
+    row.append(chk, lbl, pct);
+
+    const selRow = document.createElement('div'); selRow.className = 'bm-cs-sel-row'; selRow.style.display = 'none';
+    const sel = document.createElement('select'); sel.className = 'bm-cs-sel';
+    CS_PRESETS.forEach((p, i) => {
+      const opt = document.createElement('option'); opt.value = i; opt.textContent = p.label; sel.appendChild(opt);
+    });
+    selRow.appendChild(sel);
+
+    const slider = document.createElement('input'); slider.type = 'range'; slider.className = 'bm-slider';
+    slider.min = 0; slider.max = 1; slider.step = 0.05; slider.value = _csReliefOpacity;
+    slider.disabled = true; slider.style.opacity = '0.4';
+
+    item.append(row, selRow, slider); bmContainer.appendChild(item);
+
+    function applyCs(val) {
+      _csReliefOpacity = val;
+      pct.textContent = Math.round(val * 100) + '%';
+      slider.value = val;
+      if (_csReliefLayer) _csReliefLayer.setOpacity(val);
+    }
+
+    chk.addEventListener('change', function() {
+      if (this.checked) {
+        selRow.style.display = ''; slider.disabled = false; slider.style.opacity = '1';
+        _switchCsRelief(CS_PRESETS[parseInt(sel.value)]);
+        applyCs(_csReliefOpacity);
+      } else {
+        selRow.style.display = 'none'; slider.disabled = true; slider.style.opacity = '0.4';
+        _switchCsRelief(null);
+        pct.textContent = Math.round(_csReliefOpacity * 100) + '%';
+      }
+    });
+    sel.addEventListener('change', function() {
+      if (chk.checked) _switchCsRelief(CS_PRESETS[parseInt(this.value)]);
+    });
+    slider.addEventListener('input', function() { applyCs(parseFloat(this.value)); });
+  })();
+
   lcList.insertBefore(bmContainer, bmLbl.nextSibling);
 
   /* ── オーバーレイ セクションラベル ── */
