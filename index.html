@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a6030" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="森林計画図" />
+    <title>森林計画図</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./style.css?v=1" />
+    <!-- ★ 各事業体の設定ファイル（必ずmain.jsより前に読み込む） -->
+    <script src="./config.js?v=1"></script>
+  </head>
+  <body>
+    <main class="page">
+      <section class="map-card">
+        <div id="map" aria-label="地図"></div>
+      </section>
+    </main>
+
+    <!-- 読み込みインジケーター -->
+    <div id="loadingIndicator">
+      <div id="loadingInner">
+        <div id="loadingSpinner"></div>
+        <div id="loadingText">データ読み込み中...</div>
+      </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div id="toast"></div>
+
+    <!-- カメラ入力（常時DOM保持・iOS対策） -->
+    <input id="cameraInput" type="file" accept="image/*" capture="environment" style="display:none" />
+
+    <!-- Excel連携: ファイル入力（非表示） -->
+    <input id="xlsxInput" type="file" accept=".xlsx,.xls,.csv" style="display:none" />
+
+    <!-- Excel連携モーダル -->
+    <div id="xlsxModal">
+      <div id="xlsxModalBox">
+        <div id="xlsxModalTitle">📊 Excel / CSV 連携</div>
+        <div id="xlsxModalInfo"></div>
+        <div class="xlsxRow">
+          <label class="xlsxLabel">対象レイヤ</label>
+          <select id="xlsxLayerSel"></select>
+        </div>
+        <div class="xlsxRow">
+          <label class="xlsxLabel">レイヤ側キー列</label>
+          <select id="xlsxKeyGeo"></select>
+        </div>
+        <div class="xlsxRow">
+          <label class="xlsxLabel">Excel側キー列</label>
+          <select id="xlsxKeyXls"></select>
+        </div>
+        <div class="xlsxRow" id="xlsxColorRow">
+          <label class="xlsxLabel">色分け列（PMTiles のみ）</label>
+          <select id="xlsxColorCol"><option value="">── 色分けなし ──</option></select>
+        </div>
+        <div class="xlsxBtns">
+          <button id="xlsxModalCancel">キャンセル</button>
+          <button id="xlsxModalOk" class="xlsxOk">連携する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Excel連携: 統計カード -->
+    <div id="xlsxStatCard">
+      <span id="xlsxStatText"></span>
+      <button id="xlsxStatClose">解除</button>
+    </div>
+
+    <!-- Excel連携: 色分け凡例 -->
+    <div id="xlsxLegend" style="display:none"></div>
+
+    <!-- 印刷: A4範囲選択フレーム -->
+    <div id="printFrame">
+      <div id="printFrameBox">
+        <div id="printFrameLabel">印刷範囲（A4）</div>
+        <div id="printFrameNorth">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" width="44" height="51">
+            <text x="50" y="13" text-anchor="middle" font-size="17" font-weight="bold" fill="#2d3c5e" font-family="Arial,sans-serif">N</text>
+            <circle cx="50" cy="67" r="42" fill="none" stroke="#2d3c5e" stroke-width="3.5"></circle>
+            <polygon points="50,26 27,70 50,62 73,70" fill="#2d3c5e"></polygon>
+            <polygon points="50,108 27,70 50,62 73,70" fill="white" stroke="#2d3c5e" stroke-width="2.5" stroke-linejoin="round"></polygon>
+          </svg>
+        </div>
+      </div>
+      <div id="printFrameBar">
+        <button id="printFrameCancel">キャンセル</button>
+        <button id="printFrameOrient">横向き</button>
+        <button id="printFrameNext">次へ →</button>
+      </div>
+    </div>
+
+    <!-- 印刷: タイトル入力モーダル -->
+    <div id="printModal">
+      <div id="printModalBox">
+        <div id="printModalTitle">🖨️ 印刷</div>
+        <input id="printMapTitle" type="text" placeholder="タイトルを入力（任意）" maxlength="40">
+        <div id="printScaleRow">
+          <span id="printScaleLabel">縮尺</span>
+          <span id="printScaleSep">1 /</span>
+          <input id="printScaleInput" type="number" min="1" max="9999999" placeholder="（省略可）">
+        </div>
+        <div class="xlsxBtns">
+          <button id="printCancel">キャンセル</button>
+          <button id="printOk" class="xlsxOk">印刷する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 印刷時ヘッダー（@media print で表示） -->
+    <div id="printHeader">
+      <div id="printHeaderTop">
+        <div id="printHeaderMapTitle">森林計画図</div>
+        <div id="printHeaderMeta"></div>
+      </div>
+      <div id="printHeaderScale"></div>
+    </div>
+
+    <!-- 印刷時 方位記号・縮尺（@media print で表示） -->
+    <div id="printNorthOnMap">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 116" width="58" height="67">
+        <text x="50" y="13" text-anchor="middle" font-size="17" font-weight="bold" fill="#2d3c5e" font-family="Arial,sans-serif">N</text>
+        <circle cx="50" cy="67" r="42" fill="none" stroke="#2d3c5e" stroke-width="3.5"></circle>
+        <polygon points="50,26 27,70 50,62 73,70" fill="#2d3c5e"></polygon>
+        <polygon points="50,108 27,70 50,62 73,70" fill="white" stroke="#2d3c5e" stroke-width="2.5" stroke-linejoin="round"></polygon>
+      </svg>
+    </div>
+    <div id="printMapScale"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://unpkg.com/protomaps-leaflet@5.1.0/dist/protomaps-leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/georaster/dist/georaster.browser.bundle.min.js"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="./main.js?v=1"></script>
+    <script src="./weather.js?v=1"></script>
+    <script src="./excel.js?v=1"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('[SW] registered:', reg.scope))
+            .catch(err => console.warn('[SW] registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
