@@ -1,7 +1,7 @@
 {
-  "name": "宮城県森林計画図",
-  "short_name": "森林計画図",
-  "description": "宮城県の森林計画図をオフラインで閲覧できるWebマップアプリ",
+  "name": "森林調査アプリ",
+  "short_name": "森林調査",
+  "description": "林業事業体向け森林調査・計画図閲覧Webマップアプリ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

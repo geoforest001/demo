@@ -7,7 +7,7 @@ const APP_VER = 'generic-v1';
 
 /* ─── config.js から設定を読み込む ─── */
 const _cfg = (typeof APP_CONFIG !== 'undefined') ? APP_CONFIG : {};
-const APP_TITLE        = _cfg.title   || '森林計画図';
+const APP_TITLE        = _cfg.title   || '森林調査アプリ';
 const fallbackLocation = _cfg.center  || [35.0, 136.0];
 const fallbackZoom     = _cfg.zoom    || 10;
 const _IDB_NAME        = _cfg.idbName || 'forestry-surveys';
