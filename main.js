@@ -448,7 +448,7 @@ function renderLayerControl() {
       if (lc.group !== currentGroup) {
         currentGroup = lc.group;
         const grpDiv = document.createElement('div');
-        grpDiv.className = 'lc-group-label';
+        grpDiv.className = 'lc-group-label lc-group-collapsed';
         grpDiv.innerHTML = '<span class="lc-group-arrow">▾</span><span>' + currentGroup + '</span>';
         grpDiv.addEventListener('click', function() {
           const collapsed = this.classList.toggle('lc-group-collapsed');
@@ -460,6 +460,8 @@ function renderLayerControl() {
         });
         overlaysDiv.insertBefore(grpDiv, label);
       }
+      // 初期状態：全ラベルを閉じておく
+      label.style.display = 'none';
     });
   })();
 
