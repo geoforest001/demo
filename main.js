@@ -435,6 +435,26 @@ function renderLayerControl() {
     overlaysDiv.insertBefore(ovLbl, overlaysDiv.firstChild);
   }
 
+  /* ── 市町村グループヘッダー挿入 ── */
+  (function() {
+    const allLabels = Array.from(overlaysDiv.querySelectorAll(':scope > label'));
+    const geoCount  = _GEO_LAYERS.filter(lc => _geoLayers[lc.name]).length;
+    const forestLabels = allLabels.slice(geoCount);
+    const active = _FOREST_LAYERS.filter(lc => window.pmLayers && window.pmLayers[lc.name]);
+    let currentGroup = null;
+    active.forEach(function(lc, i) {
+      const label = forestLabels[i];
+      if (!label || !lc.group) return;
+      if (lc.group !== currentGroup) {
+        currentGroup = lc.group;
+        const grpDiv = document.createElement('div');
+        grpDiv.className = 'lc-group-label';
+        grpDiv.textContent = currentGroup;
+        overlaysDiv.insertBefore(grpDiv, label);
+      }
+    });
+  })();
+
   if (window.innerWidth < 768) closePanel();
 }
 

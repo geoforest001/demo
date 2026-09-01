@@ -162,6 +162,18 @@ body {
   display: block;
 }
 
+/* ─── 市町村グループラベル ─── */
+.lc-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: #4a6741;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  margin: 6px -8px 2px;
+  border-radius: 3px;
+}
+
 /* ─── 気象レイヤチェックボックス ─── */
 #wxLayers {
   display: grid;
