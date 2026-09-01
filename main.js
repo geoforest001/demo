@@ -164,7 +164,7 @@ function _buildLabelRules(dataLayer){
   switch(dataLayer){
     case 'rinpan': return [{
       dataLayer, minzoom:10,
-      symbolizer: _centroidSymbolizer((()=>{ const t=new protomapsL.CenteredTextSymbolizer({labelProps:['_R'],font:'bold 14px sans-serif',fill:'#1b5e20',stroke:'rgba(255,255,255,0.8)',width:2}); return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); const orig=feature.props; feature.props=Object.assign({},orig,{_R:String(parseInt(orig['RIN']||'0',10))}); const r=t.place(layout,[[{x:cx,y:cy}]],feature); feature.props=orig; return r; } }; })())
+      symbolizer:(()=>{ const t=new protomapsL.CenteredTextSymbolizer({labelProps:['_R'],font:'bold 14px sans-serif',fill:'#1b5e20',stroke:'rgba(255,255,255,0.8)',width:2}); return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); const orig=feature.props; feature.props=Object.assign({},orig,{_R:String(parseInt(orig['RIN']||'0',10))}); const r=t.place(layout,[[{x:cx,y:cy}]],feature); feature.props=orig; return r; } }; })()
     }];
     case 'kokuyuurin_rinpan': return [{
       dataLayer, minzoom:11,
