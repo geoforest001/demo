@@ -1,7 +1,7 @@
 {
-  "name": "森林調査アプリ",
-  "short_name": "森林調査",
-  "description": "林業事業体向け森林調査・計画図閲覧Webマップアプリ",
+  "name": "デモ用マップアプリ",
+  "short_name": "デモ",
+  "description": "デモ用Webマップアプリ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
