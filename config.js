@@ -30,18 +30,21 @@ const APP_CONFIG = {
    *              省略時は全プロパティをテーブル表示
    */
   forestLayers: [
-    // ── 小班（民有林）──
-    { url: 'data/ina_shohan.pmtiles',          dataLayer: 'shohan', name: '伊那市 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
-    { url: 'data/tatsuno_shohan.pmtiles',      dataLayer: 'shohan', name: '辰野町 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
-    { url: 'data/minowa_shohan.pmtiles',       dataLayer: 'shohan', name: '箕輪町 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    // ── 伊那市 ──
+    { url: 'data/ina_shohan.pmtiles',          dataLayer: 'shohan', name: '伊那市 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/ina_rinpan.pmtiles',          dataLayer: 'rinpan', name: '伊那市 林班', strokeColor: '#8d6ca2', strokeWidth: 3,   zIndex: 410, keys: ['RIN'] },
+    // ── 辰野町 ──
+    { url: 'data/tatsuno_shohan.pmtiles',      dataLayer: 'shohan', name: '辰野町 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/tatsuno_rinpan.pmtiles',      dataLayer: 'rinpan', name: '辰野町 林班', strokeColor: '#8d6ca2', strokeWidth: 3,   zIndex: 410, keys: ['RIN'] },
+    // ── 箕輪町 ──
+    { url: 'data/minowa_shohan.pmtiles',       dataLayer: 'shohan', name: '箕輪町 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/minowa_rinpan.pmtiles',       dataLayer: 'rinpan', name: '箕輪町 林班', strokeColor: '#8d6ca2', strokeWidth: 3,   zIndex: 410, keys: ['RIN'] },
+    // ── 南箕輪村 ──
     { url: 'data/minamiminowa_shohan.pmtiles', dataLayer: 'shohan', name: '南箕輪村 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
-    { url: 'data/miyada_shohan.pmtiles',       dataLayer: 'shohan', name: '宮田村 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
-    // ── 林班（民有林）──
-    { url: 'data/ina_rinpan.pmtiles',          dataLayer: 'rinpan', name: '伊那市 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
-    { url: 'data/tatsuno_rinpan.pmtiles',      dataLayer: 'rinpan', name: '辰野町 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
-    { url: 'data/minowa_rinpan.pmtiles',       dataLayer: 'rinpan', name: '箕輪町 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
-    { url: 'data/minamiminowa_rinpan.pmtiles', dataLayer: 'rinpan', name: '南箕輪村 林班', strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
-    { url: 'data/miyada_rinpan.pmtiles',       dataLayer: 'rinpan', name: '宮田村 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    { url: 'data/minamiminowa_rinpan.pmtiles', dataLayer: 'rinpan', name: '南箕輪村 林班', strokeColor: '#8d6ca2', strokeWidth: 3,   zIndex: 410, keys: ['RIN'] },
+    // ── 宮田村 ──
+    { url: 'data/miyada_shohan.pmtiles',       dataLayer: 'shohan', name: '宮田村 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/miyada_rinpan.pmtiles',       dataLayer: 'rinpan', name: '宮田村 林班', strokeColor: '#8d6ca2', strokeWidth: 3,   zIndex: 410, keys: ['RIN'] },
     // ── 国有林 ──
     { url: 'data/inadani_kokuyuurin_shohan.pmtiles', dataLayer: 'kokuyuurin_shohan', name: '国有林 小班', strokeColor: '#2e7d32', strokeWidth: 1.2, zIndex: 421, keys: ['SHO','林種','樹種','林齢','面積'] },
     { url: 'data/inadani_kokuyuurin_rinpan.pmtiles', dataLayer: 'kokuyuurin_rinpan', name: '国有林 林班', strokeColor: '#558b2f', strokeWidth: 3,   zIndex: 411, keys: ['RIN'] },
