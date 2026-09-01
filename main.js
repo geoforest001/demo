@@ -143,6 +143,53 @@ window.makeLayerPopup = function(name, props) {
   return null; /* null → 全プロパティテーブルで表示（excel.js が処理） */
 };
 
+/* ─── ラベル用ヘルパー ─── */
+const _IROHA      = ['い','ろ','は','に','ほ','へ','と','ち','り','ぬ','る','を','わ','か','よ','た','れ','そ','つ','ね','な','ら','む','う','ゐ','の','お','く','や','ま','け','ふ','こ','え','て','あ','さ','き','ゆ','め','み','し','ゑ','ひ','も','せ','す'];
+const _KATA_IROHA = ['イ','ロ','ハ','ニ','ホ','ヘ','ト','チ','リ','ヌ','ル','ヲ','ワ','カ','ヨ','タ','レ','ソ','ツ','ネ','ナ','ラ','ム','ウ','ヰ','ノ','オ','ク','ヤ','マ','ケ','フ','コ','エ','テ','ア','サ','キ','ユ','メ','ミ','シ','ヱ','ヒ','モ','セ','ス'];
+function _polygonCentroid(ring){
+  let area=0,cx=0,cy=0;
+  const n=(ring[0].x===ring[ring.length-1].x&&ring[0].y===ring[ring.length-1].y)?ring.length-1:ring.length;
+  for(let i=0,j=n-1;i<n;j=i++){
+    const cross=ring[j].x*ring[i].y-ring[i].x*ring[j].y;
+    area+=cross; cx+=(ring[j].x+ring[i].x)*cross; cy+=(ring[j].y+ring[i].y)*cross;
+  }
+  area/=2;
+  if(Math.abs(area)<1e-10){ let sx=0,sy=0; for(let i=0;i<n;i++){sx+=ring[i].x;sy+=ring[i].y;} return{x:sx/n,y:sy/n}; }
+  return{x:cx/(6*area),y:cy/(6*area)};
+}
+function _centroidSymbolizer(inner){
+  return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); return inner.place(layout,[[{x:cx,y:cy}]],feature); } };
+}
+function _buildLabelRules(dataLayer){
+  switch(dataLayer){
+    case 'rinpan': return [{
+      dataLayer, minzoom:10,
+      symbolizer: _centroidSymbolizer((()=>{ const t=new protomapsL.CenteredTextSymbolizer({labelProps:['_R'],font:'bold 14px sans-serif',fill:'#1b5e20',stroke:'rgba(255,255,255,0.8)',width:2}); return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); const orig=feature.props; feature.props=Object.assign({},orig,{_R:String(parseInt(orig['RIN']||'0',10))}); const r=t.place(layout,[[{x:cx,y:cy}]],feature); feature.props=orig; return r; } }; })())
+    }];
+    case 'kokuyuurin_rinpan': return [{
+      dataLayer, minzoom:11,
+      symbolizer: _centroidSymbolizer(new protomapsL.CenteredTextSymbolizer({labelProps:['林班主番'],font:'11px sans-serif',fill:'#1a5c1a',stroke:'rgba(255,255,255,0.8)',width:2}))
+    }];
+    case 'shohan': return [{
+      dataLayer, minzoom:13,
+      symbolizer:(()=>{ const t=new protomapsL.CenteredTextSymbolizer({labelProps:['_S'],font:'bold 13px sans-serif',fill:'#0d47a1',stroke:'rgba(255,255,255,0.9)',width:3}); return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); const orig=feature.props; const idx=(orig['SHO']||'').toUpperCase().charCodeAt(0)-65; feature.props=Object.assign({},orig,{_S:(idx>=0&&idx<_IROHA.length)?_IROHA[idx]:(orig['SHO']||'')}); const r=t.place(layout,[[{x:cx,y:cy}]],feature); feature.props=orig; return r; } }; })()
+    }];
+    case 'kokuyuurin_shohan': return [{
+      dataLayer, minzoom:13,
+      symbolizer: _centroidSymbolizer(new protomapsL.CenteredTextSymbolizer({labelProps:['小班名'],font:'10px sans-serif',fill:'#1a5c1a',stroke:'rgba(255,255,255,0.8)',width:2}))
+    }];
+    case 'segyohan': return [{
+      dataLayer, minzoom:14,
+      symbolizer:(()=>{ const t=new protomapsL.CenteredTextSymbolizer({labelProps:['_S'],font:'9px sans-serif',fill:'#bf360c',stroke:'rgba(255,255,255,0.8)',width:1.5}); return { place(layout,geom,feature){ const ring=geom[0]; if(!ring||!ring.length) return; const{x:cx,y:cy}=_polygonCentroid(ring); const orig=feature.props; const eda=String(orig['EDA']||'').toUpperCase(); const ei=eda.charCodeAt(0)-65; const eStr=(ei>=0&&ei<_KATA_IROHA.length)?_KATA_IROHA[ei]:eda; feature.props=Object.assign({},orig,{_S:String(parseInt(orig['SEGYO']||'0',10))+eStr}); const r=t.place(layout,[[{x:cx,y:cy}]],feature); feature.props=orig; return r; } }; })()
+    }];
+    case 'kokuyuurin_rindou': return [{
+      dataLayer, minzoom:13,
+      symbolizer: new protomapsL.LineLabelSymbolizer({labelProps:['林道名'],font:'11px sans-serif',fill:'#cc4400',stroke:'rgba(255,255,255,0.85)',width:2})
+    }];
+    default: return [];
+  }
+}
+
 /* ─── PMTilesレイヤを config から生成 ─── */
 window.pmLayers = {};
 
@@ -158,7 +205,7 @@ _FOREST_LAYERS.forEach(function(lc) {
 
   const layer = protomapsL.leafletLayer({
     url: lc.url, maxDataZoom: 18,
-    paintRules: paintRules, labelRules: [], pane: paneName,
+    paintRules: paintRules, labelRules: _buildLabelRules(lc.dataLayer), pane: paneName,
   });
 
   window.pmLayers[lc.name] = {
