@@ -162,17 +162,30 @@ body {
   display: block;
 }
 
-/* ─── 市町村グループラベル ─── */
+/* ─── 市町村グループラベル（折り畳み式） ─── */
 .lc-group-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 10px;
   font-weight: 700;
   color: #fff;
   background: #4a6741;
   letter-spacing: 0.05em;
-  padding: 2px 8px;
+  padding: 3px 8px;
   margin: 6px -8px 2px;
   border-radius: 3px;
+  cursor: pointer;
+  user-select: none;
 }
+.lc-group-label:hover { background: #3a5431; }
+.lc-group-arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+  font-size: 11px;
+  line-height: 1;
+}
+.lc-group-collapsed .lc-group-arrow { transform: rotate(-90deg); }
 
 /* ─── 気象レイヤチェックボックス ─── */
 #wxLayers {

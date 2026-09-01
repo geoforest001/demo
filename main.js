@@ -435,7 +435,7 @@ function renderLayerControl() {
     overlaysDiv.insertBefore(ovLbl, overlaysDiv.firstChild);
   }
 
-  /* ── 市町村グループヘッダー挿入 ── */
+  /* ── 市町村グループヘッダー挿入（折り畳み式） ── */
   (function() {
     const allLabels = Array.from(overlaysDiv.querySelectorAll(':scope > label'));
     const geoCount  = _GEO_LAYERS.filter(lc => _geoLayers[lc.name]).length;
@@ -449,7 +449,15 @@ function renderLayerControl() {
         currentGroup = lc.group;
         const grpDiv = document.createElement('div');
         grpDiv.className = 'lc-group-label';
-        grpDiv.textContent = currentGroup;
+        grpDiv.innerHTML = '<span class="lc-group-arrow">▾</span><span>' + currentGroup + '</span>';
+        grpDiv.addEventListener('click', function() {
+          const collapsed = this.classList.toggle('lc-group-collapsed');
+          let el = this.nextElementSibling;
+          while (el && !el.classList.contains('lc-group-label')) {
+            if (el.tagName === 'LABEL') el.style.display = collapsed ? 'none' : '';
+            el = el.nextElementSibling;
+          }
+        });
         overlaysDiv.insertBefore(grpDiv, label);
       }
     });
