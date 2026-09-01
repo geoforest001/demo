@@ -160,7 +160,14 @@ body {
   text-transform: uppercase;
   padding: 6px 2px 2px;
   display: block;
+  user-select: none;
 }
+.lc-section-label:hover { color: #555; }
+.lc-section-arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.lc-section-collapsed .lc-section-arrow { transform: rotate(-90deg); }
 
 /* ─── 市町村グループラベル（折り畳み式） ─── */
 .lc-group-label {

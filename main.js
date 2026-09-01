@@ -476,9 +476,32 @@ function renderLayerControl() {
 
   lcList.insertBefore(bmContainer, bmLbl.nextSibling);
 
-  /* ── オーバーレイ セクションラベル ── */
+  /* ── オーバーレイ セクションラベル（折り畳み式） ── */
   if (Object.keys(overlayMaps).length > 0) {
-    const ovLbl = document.createElement('div'); ovLbl.className = 'lc-section-label'; ovLbl.textContent = '森林レイヤ';
+    const ovLbl = document.createElement('div');
+    ovLbl.className = 'lc-section-label lc-section-collapsed';
+    ovLbl.innerHTML = '<span class="lc-section-arrow">▾</span> 森林レイヤ';
+    ovLbl.style.cursor = 'pointer';
+    ovLbl.addEventListener('click', function() {
+      const collapsed = this.classList.toggle('lc-section-collapsed');
+      if (collapsed) {
+        // 全体を閉じる
+        overlaysDiv.querySelectorAll(':scope > .lc-group-label, :scope > label').forEach(function(el) {
+          el.style.display = 'none';
+        });
+      } else {
+        // グループヘッダーは表示、ラベルは各グループの開閉状態に従う
+        let currentGroupCollapsed = false;
+        Array.from(overlaysDiv.children).forEach(function(el) {
+          if (el.classList.contains('lc-group-label')) {
+            el.style.display = '';
+            currentGroupCollapsed = el.classList.contains('lc-group-collapsed');
+          } else if (el.tagName === 'LABEL') {
+            el.style.display = currentGroupCollapsed ? 'none' : '';
+          }
+        });
+      }
+    });
     overlaysDiv.insertBefore(ovLbl, overlaysDiv.firstChild);
   }
 
@@ -509,6 +532,10 @@ function renderLayerControl() {
       }
       // 初期状態：全ラベルを閉じておく
       label.style.display = 'none';
+    });
+    // セクション自体も初期状態で閉じているのでグループヘッダーも非表示
+    overlaysDiv.querySelectorAll(':scope > .lc-group-label').forEach(function(el) {
+      el.style.display = 'none';
     });
   })();
 
