@@ -5,8 +5,8 @@
 const APP_CONFIG = {
   /* ───────── 基本設定 ───────── */
   title:   'デモ用マップアプリ',        // アプリタイトル（例: '○○事業体 森林調査アプリ'）
-  center:  [36.65, 138.18],            // 初期表示中心 [緯度, 経度]（長野県中心部）
-  zoom:    7,                         // 初期ズームレベル
+  center:  [35.83, 137.93],            // 初期表示中心 [緯度, 経度]（伊那谷）
+  zoom:    11,                         // 初期ズームレベル
   idbName: 'forestry-surveys',        // IndexedDB名（事業体ごとに変更を推奨）
 
   /* ───────── 追加ベースマップ ───────── */
@@ -30,43 +30,22 @@ const APP_CONFIG = {
    *              省略時は全プロパティをテーブル表示
    */
   forestLayers: [
-    // 例: 以下のコメントを外してパスを調整してください
-    // {
-    //   url:         'data/林小班.pmtiles',
-    //   dataLayer:   'kobandan',
-    //   name:        '林小班',
-    //   strokeColor: '#ff0000',
-    //   strokeWidth: 1,
-    //   zIndex:      403,
-    //   keys:        ['KEYCODE','小班','林種','中樹種','林齢','齢級','小班面積','所有形態','ADDDATE'],
-    //   popup: (props) => `
-    //     <div class="forest-popup">
-    //       <div class="popup-title">🌲 林小班: ${props['小班'] || ''}</div>
-    //       <table>
-    //         <tr><th>林種</th><td>${props['林種'] || '―'}</td></tr>
-    //         <tr><th>林齢</th><td>${props['林齢'] != null ? props['林齢'] + '年' : '―'}</td></tr>
-    //         <tr><th>小班面積</th><td>${props['小班面積'] != null ? props['小班面積'] + ' ha' : '―'}</td></tr>
-    //       </table>
-    //     </div>`,
-    // },
-    // {
-    //   url:         'data/林班.pmtiles',
-    //   dataLayer:   'rinpan',
-    //   name:        '林班',
-    //   strokeColor: '#8d6ca2',
-    //   strokeWidth: 3,
-    //   zIndex:      401,
-    //   keys:        ['RINPAN','SICHOSON_N','ADDDATE'],
-    // },
-    // {
-    //   url:         'data/準林班.pmtiles',
-    //   dataLayer:   'junrinpan',
-    //   name:        '準林班',
-    //   strokeColor: '#49ce7f',
-    //   strokeWidth: 2,
-    //   zIndex:      402,
-    //   keys:        ['RINPAN','JUNRINPAN','SICHOSON_N','KEYCODE'],
-    // },
+    // ── 小班（民有林）──
+    { url: 'data/ina_shohan.pmtiles',          dataLayer: 'shohan', name: '伊那市 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/tatsuno_shohan.pmtiles',      dataLayer: 'shohan', name: '辰野町 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/minowa_shohan.pmtiles',       dataLayer: 'shohan', name: '箕輪町 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/minamiminowa_shohan.pmtiles', dataLayer: 'shohan', name: '南箕輪村 小班', strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    { url: 'data/miyada_shohan.pmtiles',       dataLayer: 'shohan', name: '宮田村 小班',   strokeColor: '#1565c0', strokeWidth: 1.2, zIndex: 420, keys: ['SHO','林種','育成区分','施業区分','樹種','林齢','面積'] },
+    // ── 林班（民有林）──
+    { url: 'data/ina_rinpan.pmtiles',          dataLayer: 'rinpan', name: '伊那市 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    { url: 'data/tatsuno_rinpan.pmtiles',      dataLayer: 'rinpan', name: '辰野町 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    { url: 'data/minowa_rinpan.pmtiles',       dataLayer: 'rinpan', name: '箕輪町 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    { url: 'data/minamiminowa_rinpan.pmtiles', dataLayer: 'rinpan', name: '南箕輪村 林班', strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    { url: 'data/miyada_rinpan.pmtiles',       dataLayer: 'rinpan', name: '宮田村 林班',   strokeColor: '#8d6ca2', strokeWidth: 3, zIndex: 410, keys: ['RIN'] },
+    // ── 国有林 ──
+    { url: 'data/inadani_kokuyuurin_shohan.pmtiles', dataLayer: 'kokuyuurin_shohan', name: '国有林 小班', strokeColor: '#2e7d32', strokeWidth: 1.2, zIndex: 421, keys: ['SHO','林種','樹種','林齢','面積'] },
+    { url: 'data/inadani_kokuyuurin_rinpan.pmtiles', dataLayer: 'kokuyuurin_rinpan', name: '国有林 林班', strokeColor: '#558b2f', strokeWidth: 3,   zIndex: 411, keys: ['RIN'] },
+    { url: 'data/inadani_kokuyuurin_rindou.pmtiles', dataLayer: 'kokuyuurin_rindou', name: '国有林 林道', strokeColor: '#e65100', strokeWidth: 2,   zIndex: 440, keys: [] },
   ],
 
   /* ───────── GeoJSON レイヤ ───────── */
