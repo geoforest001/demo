@@ -213,7 +213,12 @@ document.getElementById('xlsxStatClose').addEventListener('click', function() {
 /* ── PMTilesクリックハンドラ ── */
 map.on('click', function(e) {
   var pmLayers = window.pmLayers || {};
-  for (var name of Object.keys(pmLayers)) {
+  // 属性表示チェックが入っているレイヤを優先、なければ全表示レイヤを順に検索
+  var attrActive = window.attrActiveLayer;
+  var searchNames = attrActive && pmLayers[attrActive]
+    ? [attrActive]
+    : Object.keys(pmLayers);
+  for (var name of searchNames) {
     var cfg = pmLayers[name];
     if (!map.hasLayer(cfg.layer)) continue;
 

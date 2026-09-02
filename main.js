@@ -539,6 +539,49 @@ function renderLayerControl() {
     });
   })();
 
+  /* ── 属性表示チェックボックスを各レイヤ行に追加 ── */
+  (function() {
+    const allLabels = Array.from(overlaysDiv.querySelectorAll(':scope > label'));
+    const geoCount  = _GEO_LAYERS.filter(lc => _geoLayers[lc.name]).length;
+    const forestLabels = allLabels.slice(geoCount);
+    const active = _FOREST_LAYERS.filter(lc => window.pmLayers && window.pmLayers[lc.name]);
+    window.attrActiveLayer = null;
+
+    active.forEach(function(lc, i) {
+      const label = forestLabels[i];
+      if (!label) return;
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.display = 'none'; // 初期非表示を維持
+
+      const wrap = document.createElement('span');
+      wrap.className = 'attr-chk-wrap';
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'attr-chk';
+      chk.title = 'この属性を表示対象にする';
+      chk.addEventListener('change', function(e) {
+        e.stopPropagation();
+        if (this.checked) {
+          overlaysDiv.querySelectorAll('.attr-chk').forEach(function(c) { if (c !== chk) c.checked = false; });
+          window.attrActiveLayer = lc.name;
+        } else {
+          window.attrActiveLayer = null;
+        }
+      });
+      chk.addEventListener('click', function(e) { e.stopPropagation(); });
+
+      const txt = document.createElement('span');
+      txt.textContent = '属性';
+      txt.className = 'attr-chk-txt';
+
+      wrap.appendChild(chk);
+      wrap.appendChild(txt);
+      label.appendChild(wrap);
+    });
+  })();
+
   if (window.innerWidth < 768) closePanel();
 }
 
