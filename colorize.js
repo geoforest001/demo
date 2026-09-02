@@ -40,11 +40,13 @@ function _collectVals(attr) {
     pts.forEach(function(pt) {
       try {
         var results = pmInfo.layer.queryTileFeaturesDebug(pt.lng, pt.lat, 0);
-        (results || []).forEach(function(r) {
-          if (r.dataLayer === lc.dataLayer && r.feature && r.feature.props) {
-            var v = r.feature.props[attr];
-            if (v !== undefined && v !== null && v !== '') vals.add(String(v));
-          }
+        (results || []).forEach(function(entry) {
+          (entry[1] || []).forEach(function(f) {
+            if (f.layerName === lc.dataLayer && f.feature && f.feature.props) {
+              var v = f.feature.props[attr];
+              if (v !== undefined && v !== null && v !== '') vals.add(String(v));
+            }
+          });
         });
       } catch (_) {}
     });
