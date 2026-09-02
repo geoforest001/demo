@@ -171,24 +171,41 @@ body {
 
 /* ─── 属性表示チェックボックス ─── */
 .attr-chk-wrap {
-  float: right;
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding-left: 6px;
+  gap: 3px;
+  margin-left: auto;
+  padding-left: 8px;
+}
+.leaflet-control-layers-overlays > label > div {
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 .attr-chk {
-  width: 12px;
-  height: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #bbb;
+  border-radius: 50%;
   cursor: pointer;
-  accent-color: #1565c0;
-  vertical-align: middle;
+  background: #fff;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  background-size: 9px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.attr-chk:checked {
+  background-color: #1565c0;
+  border-color: #1565c0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5L8 3' stroke='white' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 .attr-chk-txt {
   font-size: 9px;
   color: #aaa;
   white-space: nowrap;
-  vertical-align: middle;
 }
 .attr-chk:checked + .attr-chk-txt { color: #1565c0; font-weight: 700; }
 

@@ -575,7 +575,8 @@ function renderLayerControl() {
 
       wrap.appendChild(chk);
       wrap.appendChild(txt);
-      label.appendChild(wrap);
+      const innerDiv = label.querySelector('div') || label;
+      innerDiv.appendChild(wrap);
     });
   })();
 
