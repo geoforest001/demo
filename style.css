@@ -170,28 +170,25 @@ body {
 .lc-section-collapsed .lc-section-arrow { transform: rotate(-90deg); }
 
 /* ─── 属性表示チェックボックス ─── */
-.leaflet-control-layers-overlays label {
-  display: flex !important;
-  align-items: center;
-}
 .attr-chk-wrap {
+  float: right;
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin-left: auto;
-  padding-left: 8px;
-  flex-shrink: 0;
+  padding-left: 6px;
 }
 .attr-chk {
   width: 12px;
   height: 12px;
   cursor: pointer;
   accent-color: #1565c0;
+  vertical-align: middle;
 }
 .attr-chk-txt {
   font-size: 9px;
-  color: #888;
+  color: #aaa;
   white-space: nowrap;
+  vertical-align: middle;
 }
 .attr-chk:checked + .attr-chk-txt { color: #1565c0; font-weight: 700; }
 

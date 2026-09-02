@@ -550,9 +550,6 @@ function renderLayerControl() {
     active.forEach(function(lc, i) {
       const label = forestLabels[i];
       if (!label) return;
-      label.style.display = 'flex';
-      label.style.alignItems = 'center';
-      label.style.display = 'none'; // 初期非表示を維持
 
       const wrap = document.createElement('span');
       wrap.className = 'attr-chk-wrap';
