@@ -213,6 +213,7 @@ _FOREST_LAYERS.forEach(function(lc) {
     dataLayer: lc.dataLayer,
     keys:      lc.keys || [],
     _paintRules: paintRules,
+    _lc:       lc,
   };
 });
 
@@ -480,7 +481,14 @@ function renderLayerControl() {
   if (Object.keys(overlayMaps).length > 0) {
     const ovLbl = document.createElement('div');
     ovLbl.className = 'lc-section-label lc-section-collapsed';
-    ovLbl.innerHTML = '<span class="lc-section-arrow">▾</span> 森林レイヤ';
+    ovLbl.style.display = 'flex';
+    ovLbl.style.alignItems = 'center';
+    ovLbl.style.justifyContent = 'space-between';
+    ovLbl.innerHTML = '<div><span class="lc-section-arrow">▾</span> 森林レイヤ</div><button class="lc-colorize-btn" title="施業班を属性で色分け">🎨</button>';
+    ovLbl.querySelector('.lc-colorize-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (window.openColorizePanel) window.openColorizePanel();
+    });
     ovLbl.style.cursor = 'pointer';
     ovLbl.addEventListener('click', function() {
       const collapsed = this.classList.toggle('lc-section-collapsed');
