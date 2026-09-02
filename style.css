@@ -170,9 +170,15 @@ body {
 .lc-section-collapsed .lc-section-arrow { transform: rotate(-90deg); }
 
 /* ─── 属性表示チェックボックス ─── */
+.leaflet-control-layers-overlays > label {
+  display: flex;
+  align-items: center;
+}
 .leaflet-control-layers-overlays > label > div {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 .attr-chk-wrap {
   display: inline-flex;
