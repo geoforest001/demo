@@ -170,17 +170,30 @@ body {
 .lc-section-collapsed .lc-section-arrow { transform: rotate(-90deg); }
 
 /* ─── 属性表示チェックボックス ─── */
+.leaflet-control-layers-overlays > label {
+  display: flex !important;
+  align-items: center;
+  padding-right: 4px;
+}
+.leaflet-control-layers-overlays > label > div {
+  display: flex !important;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.leaflet-control-layers-overlays > label > div > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .attr-chk-wrap {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  margin-left: auto;
-  padding-left: 8px;
-}
-.leaflet-control-layers-overlays > label > div {
-  display: flex;
-  align-items: center;
-  width: 100%;
+  flex-shrink: 0;
+  padding-left: 6px;
 }
 .attr-chk {
   appearance: none;
