@@ -39,7 +39,7 @@ function _collectVals(attr) {
     if (!pmInfo || !pmInfo.layer || !map.hasLayer(pmInfo.layer)) return;
     pts.forEach(function(pt) {
       try {
-        var results = pmInfo.layer.queryTileFeaturesDebug(pt);
+        var results = pmInfo.layer.queryTileFeaturesDebug(pt.lng, pt.lat, 0);
         (results || []).forEach(function(r) {
           if (r.dataLayer === lc.dataLayer && r.feature && r.feature.props) {
             var v = r.feature.props[attr];
