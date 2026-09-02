@@ -1,6 +1,6 @@
 /* ─── 施業班 色分け機能 ─── */
 
-// 属性値の文字列から決定論的な色を生成（事前スキャン不要）
+// 属性値の文字列から決定論的な色を生成
 function _czHash(str) {
   var h = 0;
   for (var i = 0; i < str.length; i++) {
@@ -8,50 +8,18 @@ function _czHash(str) {
     h |= 0;
   }
   h = h & 0x7fffffff;
-  // 色相: 0-359, 彩度: 55-75%, 明度: 40-52%
   var hue = h % 360;
   var sat = 55 + (h >> 8 & 0xf);
   var lit = 40 + (h >> 12 & 0xb);
   return 'hsl(' + hue + ',' + sat + '%,' + lit + '%)';
 }
 
+// fill 関数が呼ばれるたびに値を収集するセット
+window._czSeenVals = new Set();
+
 // 施業班レイヤ一覧
 function _segyoLayers() {
   return _FOREST_LAYERS.filter(function(lc) { return lc.dataLayer === 'segyohan'; });
-}
-
-// 現在の凡例用: visible なタイルから値を収集
-function _collectVals(attr) {
-  var vals = new Set();
-  var center = map.getCenter();
-  var bounds = map.getBounds();
-  var pts = [
-    center,
-    bounds.getNorthWest(), bounds.getNorthEast(),
-    bounds.getSouthWest(), bounds.getSouthEast(),
-    L.latLng((center.lat + bounds.getNorth()) / 2, center.lng),
-    L.latLng((center.lat + bounds.getSouth()) / 2, center.lng),
-    L.latLng(center.lat, (center.lng + bounds.getEast()) / 2),
-    L.latLng(center.lat, (center.lng + bounds.getWest()) / 2),
-  ];
-  _segyoLayers().forEach(function(lc) {
-    var pmInfo = window.pmLayers && window.pmLayers[lc.name];
-    if (!pmInfo || !pmInfo.layer || !map.hasLayer(pmInfo.layer)) return;
-    pts.forEach(function(pt) {
-      try {
-        var results = pmInfo.layer.queryTileFeaturesDebug(pt.lng, pt.lat, 0);
-        (results || []).forEach(function(entry) {
-          (entry[1] || []).forEach(function(f) {
-            if (f.layerName === lc.dataLayer && f.feature && f.feature.props) {
-              var v = f.feature.props[attr];
-              if (v !== undefined && v !== null && v !== '') vals.add(String(v));
-            }
-          });
-        });
-      } catch (_) {}
-    });
-  });
-  return Array.from(vals).sort();
 }
 
 // 色分け適用（ハッシュベース：タイルの事前読み込み不要）
@@ -64,13 +32,15 @@ function _czApply(attr) {
     var strokeColor = lc.strokeColor || '#e65100';
     var strokeWidth = lc.strokeWidth || 1.5;
 
-    // 値ごとにハッシュで色を決定するファンクション
+    // 値ごとにハッシュで色を決定しつつ、見た値を収集するファンクション
     var fillFn = (function(a) {
       return function(zoom, feature) {
         if (!feature || !feature.props) return 'rgba(0,0,0,0)';
         var v = feature.props[a];
         if (v === undefined || v === null || v === '') return 'rgba(150,150,150,0.3)';
-        return _czHash(String(v));
+        var str = String(v);
+        window._czSeenVals.add(str);
+        return _czHash(str);
       };
     })(attr);
 
@@ -84,9 +54,11 @@ function _czApply(attr) {
     if (map.hasLayer(pmInfo.layer)) pmInfo.layer.redraw();
   });
 
-  // まず「更新中」凡例を表示し、タイル読み込み後に値を収集して更新
+  // まず「更新中」凡例を表示し、描画後に収集した値で更新
+  window._czSeenVals.clear();
   _czShowLegendPending(attr);
-  setTimeout(function() { _czRefreshLegend(attr); }, 1200);
+  // 描画完了を待ってから凡例を構築（fill 関数が呼ばれると _czSeenVals に蓄積される）
+  setTimeout(function() { _czRefreshLegend(attr); }, 800);
 }
 
 // 色分け解除
@@ -127,13 +99,13 @@ function _czShowLegendPending(attr) {
   document.getElementById('czLegRefresh').onclick = function() { _czRefreshLegend(attr); };
 }
 
-// 凡例の値部分を更新
+// 凡例の値部分を更新（fill 関数が収集した _czSeenVals を使用）
 function _czRefreshLegend(attr) {
   var body = document.getElementById('czLegBody');
   if (!body) return;
-  var vals = _collectVals(attr);
+  var vals = Array.from(window._czSeenVals).sort();
   if (!vals.length) {
-    body.innerHTML = '<div style="font-size:11px;color:#aaa;padding:6px 0">ポリゴンが見つかりません。<br>施業班エリアに地図を移動して「凡例を更新」を押してください。</div>';
+    body.innerHTML = '<div style="font-size:11px;color:#aaa;padding:6px 0">描画待ち中。少し待って「凡例を更新」を押してください。</div>';
     return;
   }
   body.innerHTML = vals.map(function(v) {
