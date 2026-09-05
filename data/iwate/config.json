@@ -68,8 +68,7 @@
       "dataLayer": "rinban",
       "geometryType": "polygon",
       "strokeColor": "#232323",
-      "fillColor": "#ff9e17",
-      "fillOpacity": 0.5,
+      "fillColor": "rgba(255,158,23,0.5)",
       "strokeWidth": 1
     }
   ]
