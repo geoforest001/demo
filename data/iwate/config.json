@@ -51,6 +51,24 @@
       "geometryType": "line",
       "strokeColor": "#1b5ea8",
       "strokeWidth": 1.5
+    },
+    {
+      "name": "CS立体図",
+      "type": "raster",
+      "url": "data/iwate/cs.pmtiles",
+      "opacity": 0.75
+    },
+    {
+      "name": "SHC（r100）",
+      "type": "raster",
+      "url": "data/iwate/shc_r100.pmtiles",
+      "opacity": 0.7
+    },
+    {
+      "name": "谷密度",
+      "type": "raster",
+      "url": "data/iwate/tanimitsu.pmtiles",
+      "opacity": 0.7
     }
   ]
 }

@@ -79,6 +79,8 @@ async function _loadTask(taskId, listDiv) {
     try {
       if (lc.type === 'pmtiles') {
         layer = _taskLoadPMTiles(lc);
+      } else if (lc.type === 'raster') {
+        layer = _taskLoadRasterPMTiles(lc);
       } else if (lc.type === 'gpkg') {
         layer = await _taskLoadGPKG(lc);
         if (layer) {
@@ -117,7 +119,9 @@ function _taskAddRow(listDiv, lc, layer) {
 
   var sw = document.createElement('span');
   sw.className = 'task-layer-sw';
-  sw.style.background = lc.strokeColor || '#9c27b0';
+  sw.style.background = lc.type === 'raster'
+    ? 'linear-gradient(to right,#66caff,#f8fc41,#fc0707)'
+    : (lc.strokeColor || '#9c27b0');
 
   var name = document.createElement('span');
   name.textContent = lc.name;
@@ -126,6 +130,26 @@ function _taskAddRow(listDiv, lc, layer) {
   row.appendChild(sw);
   row.appendChild(name);
   listDiv.appendChild(row);
+}
+
+/* ラスタ PMTiles レイヤ生成（Leaflet GridLayer + pmtiles.js） */
+function _taskLoadRasterPMTiles(lc) {
+  var p = new pmtiles.PMTiles(lc.url);
+  var RasterLayer = L.GridLayer.extend({
+    createTile: function(coords, done) {
+      var img = document.createElement('img');
+      img.style.cssText = 'width:256px;height:256px;';
+      p.getZxy(coords.z, coords.x, coords.y).then(function(tile) {
+        if (!tile || !tile.data) { done(null, img); return; }
+        var blob = new Blob([tile.data], { type: 'image/png' });
+        img.src = URL.createObjectURL(blob);
+        img.onload = function() { done(null, img); };
+        img.onerror = function() { done(null, img); };
+      }).catch(function() { done(null, img); });
+      return img;
+    }
+  });
+  return new RasterLayer({ opacity: lc.opacity !== undefined ? lc.opacity : 0.75, maxZoom: 22, minZoom: 11 });
 }
 
 /* PMTiles レイヤ生成 */
