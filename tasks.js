@@ -99,7 +99,11 @@ async function _loadTask(taskId, listDiv) {
     _taskAddRow(listDiv, lc, layer);
   }
 
-  if (bounds) map.fitBounds(bounds, { padding: [40, 40] });
+  if (cfg.center) {
+    map.flyTo(cfg.center, cfg.zoom || 13, { duration: 1.2 });
+  } else if (bounds) {
+    map.fitBounds(bounds, { padding: [40, 40] });
+  }
   toast((cfg.name || taskId) + ' を読み込みました', 2000);
 }
 
@@ -149,7 +153,7 @@ function _taskLoadRasterPMTiles(lc) {
       return img;
     }
   });
-  return new RasterLayer({ opacity: lc.opacity !== undefined ? lc.opacity : 0.75, maxZoom: 22, minZoom: 11 });
+  return new RasterLayer({ opacity: lc.opacity !== undefined ? lc.opacity : 0.75, maxZoom: 22 });
 }
 
 /* PMTiles レイヤ生成 */
