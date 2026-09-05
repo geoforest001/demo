@@ -1,5 +1,6 @@
 [
   { "id": "task1", "name": "業務1", "icon": "📁" },
   { "id": "task2", "name": "業務2", "icon": "📁" },
-  { "id": "task3", "name": "業務3", "icon": "📁" }
+  { "id": "task3", "name": "業務3", "icon": "📁" },
+  { "id": "iwate", "name": "岩手", "icon": "📁" }
 ]
