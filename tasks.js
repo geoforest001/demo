@@ -13,31 +13,31 @@ async function initTaskSelector(overlaysDiv) {
   lbl.textContent = '業務レイヤ';
   overlaysDiv.appendChild(lbl);
 
+  /* select と listDiv を await 前に DOM に追加しておく（weather.js より先に位置確保） */
+  var sel = document.createElement('select');
+  sel.id = 'taskSel';
+  sel.className = 'task-sel';
+  sel.innerHTML = '<option value="">── 読み込み中... ──</option>';
+  overlaysDiv.appendChild(sel);
+
+  var listDiv = document.createElement('div');
+  listDiv.id = 'taskLayerList';
+  overlaysDiv.appendChild(listDiv);
+
   var tasks = [];
   try {
     var resp = await fetch('data/tasks.json');
     if (!resp.ok) throw new Error();
     tasks = await resp.json();
   } catch (_) {
-    var note = document.createElement('div');
-    note.style.cssText = 'font-size:11px;color:#aaa;padding:4px 2px;';
-    note.textContent = '（data/tasks.json が見つかりません）';
-    overlaysDiv.appendChild(note);
+    sel.innerHTML = '<option value="">（読み込み失敗）</option>';
     return;
   }
 
-  var sel = document.createElement('select');
-  sel.id = 'taskSel';
-  sel.className = 'task-sel';
   sel.innerHTML = '<option value="">── 業務を選択 ──</option>' +
     tasks.map(function(t) {
       return '<option value="' + t.id + '">' + (t.icon || '📁') + ' ' + t.name + '</option>';
     }).join('');
-  overlaysDiv.appendChild(sel);
-
-  var listDiv = document.createElement('div');
-  listDiv.id = 'taskLayerList';
-  overlaysDiv.appendChild(listDiv);
 
   sel.addEventListener('change', function() {
     _loadTask(this.value, listDiv);
