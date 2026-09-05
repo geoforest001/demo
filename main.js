@@ -588,6 +588,9 @@ function renderLayerControl() {
     });
   })();
 
+  /* ── 業務レイヤセレクター（森林レイヤと気象レイヤの間） ── */
+  if (window.initTaskSelector) initTaskSelector(overlaysDiv);
+
   if (window.innerWidth < 768) closePanel();
 }
 

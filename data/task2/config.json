@@ -1,0 +1,15 @@
+{
+  "name": "業務2",
+  "layers": [
+    {
+      "name": "サンプルポリゴン",
+      "type": "pmtiles",
+      "url": "data/task2/sample.pmtiles",
+      "dataLayer": "layer",
+      "geometryType": "polygon",
+      "strokeColor": "#2e7d32",
+      "fillColor": "rgba(46,125,50,0.15)",
+      "strokeWidth": 1.5
+    }
+  ]
+}
