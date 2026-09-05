@@ -80,7 +80,7 @@ async function _loadTask(taskId, listDiv) {
       if (lc.type === 'pmtiles') {
         layer = _taskLoadPMTiles(lc);
       } else if (lc.type === 'raster') {
-        layer = _taskLoadRasterPMTiles(lc);
+        layer = await _taskLoadRasterPMTiles(lc);
       } else if (lc.type === 'gpkg') {
         layer = await _taskLoadGPKG(lc);
         if (layer) {
@@ -136,21 +136,46 @@ function _taskAddRow(listDiv, lc, layer) {
   listDiv.appendChild(row);
 }
 
-/* ラスタ PMTiles レイヤ生成（Leaflet GridLayer + pmtiles.js） */
-function _taskLoadRasterPMTiles(lc) {
+/* ラスタ PMTiles レイヤ生成（オーバーズーム対応） */
+async function _taskLoadRasterPMTiles(lc) {
   var p = new pmtiles.PMTiles(lc.url);
+  var header = await p.getHeader();
+  var maxNativeZoom = header.maxZoom || 15;
+
   var RasterLayer = L.GridLayer.extend({
     createTile: function(coords, done) {
-      var img = document.createElement('img');
-      img.style.cssText = 'width:256px;height:256px;';
-      p.getZxy(coords.z, coords.x, coords.y).then(function(tile) {
-        if (!tile || !tile.data) { done(null, img); return; }
+      var canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 256;
+
+      /* オーバーズーム: maxNativeZoom を超えたら親タイルを拡大表示 */
+      var z = coords.z, x = coords.x, y = coords.y;
+      var nz = Math.min(z, maxNativeZoom);
+      var diff = z - nz;
+      var nx = x >> diff, ny = y >> diff;
+
+      p.getZxy(nz, nx, ny).then(function(tile) {
+        if (!tile || !tile.data) { done(null, canvas); return; }
         var blob = new Blob([tile.data], { type: 'image/png' });
-        img.src = URL.createObjectURL(blob);
-        img.onload = function() { done(null, img); };
-        img.onerror = function() { done(null, img); };
-      }).catch(function() { done(null, img); });
-      return img;
+        var url = URL.createObjectURL(blob);
+        var img = new Image();
+        img.onload = function() {
+          var ctx = canvas.getContext('2d');
+          if (diff === 0) {
+            ctx.drawImage(img, 0, 0, 256, 256);
+          } else {
+            var scale = 1 << diff;
+            var srcSize = 256 / scale;
+            var srcX = (x % scale) * srcSize;
+            var srcY = (y % scale) * srcSize;
+            ctx.drawImage(img, srcX, srcY, srcSize, srcSize, 0, 0, 256, 256);
+          }
+          URL.revokeObjectURL(url);
+          done(null, canvas);
+        };
+        img.onerror = function() { URL.revokeObjectURL(url); done(null, canvas); };
+        img.src = url;
+      }).catch(function() { done(null, canvas); });
+      return canvas;
     }
   });
   return new RasterLayer({ opacity: lc.opacity !== undefined ? lc.opacity : 0.75, maxZoom: 22 });
