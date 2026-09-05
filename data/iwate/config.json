@@ -1,4 +1,53 @@
 {
   "name": "岩手",
-  "layers": []
+  "layers": [
+    {
+      "name": "林班界(2010)",
+      "type": "pmtiles",
+      "url": "data/iwate/rinban.pmtiles",
+      "dataLayer": "rinban",
+      "geometryType": "polygon",
+      "strokeColor": "#2e7d32",
+      "fillColor": "rgba(46,125,50,0.15)",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "AIダム",
+      "type": "pmtiles",
+      "url": "data/iwate/ai_dam.pmtiles",
+      "dataLayer": "ai_dam",
+      "geometryType": "polygon",
+      "strokeColor": "#1565c0",
+      "fillColor": "rgba(21,101,192,0.2)",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "AI盛土",
+      "type": "pmtiles",
+      "url": "data/iwate/ai_morido.pmtiles",
+      "dataLayer": "ai_morido",
+      "geometryType": "polygon",
+      "strokeColor": "#e65100",
+      "fillColor": "rgba(230,81,0,0.2)",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "AI道路",
+      "type": "pmtiles",
+      "url": "data/iwate/ai_road.pmtiles",
+      "dataLayer": "ai_road",
+      "geometryType": "line",
+      "strokeColor": "#f9a825",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "谷線",
+      "type": "pmtiles",
+      "url": "data/iwate/valley.pmtiles",
+      "dataLayer": "valley",
+      "geometryType": "line",
+      "strokeColor": "#0277bd",
+      "strokeWidth": 0.8
+    }
+  ]
 }
