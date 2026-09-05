@@ -2,26 +2,31 @@
   "name": "岩手",
   "layers": [
     {
-      "name": "林班界(2010)",
-      "type": "pmtiles",
-      "url": "data/iwate/rinban.pmtiles",
-      "dataLayer": "rinban",
-      "geometryType": "polygon",
-      "strokeColor": "#232323",
-      "fillColor": "#ff9e17",
-      "fillOpacity": 0.5,
-      "strokeWidth": 1
+      "name": "CS立体図",
+      "type": "raster",
+      "url": "data/iwate/cs.pmtiles",
+      "opacity": 1.0
     },
     {
-      "name": "AIダム",
+      "name": "SHC（r100）",
+      "type": "raster",
+      "url": "data/iwate/shc_r100.pmtiles",
+      "opacity": 0.3
+    },
+    {
+      "name": "谷密度",
+      "type": "raster",
+      "url": "data/iwate/tanimitsu.pmtiles",
+      "opacity": 0.3
+    },
+    {
+      "name": "谷線",
       "type": "pmtiles",
-      "url": "data/iwate/ai_dam.pmtiles",
-      "dataLayer": "ai_dam",
-      "geometryType": "polygon",
-      "strokeColor": "#232323",
-      "fillColor": "#3100ff",
-      "fillOpacity": 0.5,
-      "strokeWidth": 1
+      "url": "data/iwate/valley.pmtiles",
+      "dataLayer": "valley",
+      "geometryType": "line",
+      "strokeColor": "#1b5ea8",
+      "strokeWidth": 1.5
     },
     {
       "name": "AI盛土",
@@ -35,6 +40,17 @@
       "strokeWidth": 1.5
     },
     {
+      "name": "AIダム",
+      "type": "pmtiles",
+      "url": "data/iwate/ai_dam.pmtiles",
+      "dataLayer": "ai_dam",
+      "geometryType": "polygon",
+      "strokeColor": "#232323",
+      "fillColor": "#3100ff",
+      "fillOpacity": 0.5,
+      "strokeWidth": 1
+    },
+    {
       "name": "AI道路",
       "type": "pmtiles",
       "url": "data/iwate/ai_road.pmtiles",
@@ -44,31 +60,15 @@
       "strokeWidth": 2
     },
     {
-      "name": "谷線",
+      "name": "林班界(2010)",
       "type": "pmtiles",
-      "url": "data/iwate/valley.pmtiles",
-      "dataLayer": "valley",
-      "geometryType": "line",
-      "strokeColor": "#1b5ea8",
-      "strokeWidth": 1.5
-    },
-    {
-      "name": "CS立体図",
-      "type": "raster",
-      "url": "data/iwate/cs.pmtiles",
-      "opacity": 0.75
-    },
-    {
-      "name": "SHC（r100）",
-      "type": "raster",
-      "url": "data/iwate/shc_r100.pmtiles",
-      "opacity": 0.7
-    },
-    {
-      "name": "谷密度",
-      "type": "raster",
-      "url": "data/iwate/tanimitsu.pmtiles",
-      "opacity": 0.7
+      "url": "data/iwate/rinban.pmtiles",
+      "dataLayer": "rinban",
+      "geometryType": "polygon",
+      "strokeColor": "#232323",
+      "fillColor": "#ff9e17",
+      "fillOpacity": 0.5,
+      "strokeWidth": 1
     }
   ]
 }
