@@ -90,6 +90,7 @@ const CS_PRESETS = [
   { label: '愛媛県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_ehime/{z}/{x}/{y}.png',                   maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
   { label: '熊本・大分', url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_kumamoto_oita/{z}/{x}/{y}.png',           maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
   { label: '能登地域2022', url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_noto/{z}/{x}/{y}.png',                 maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '能登地域_2024', url: 'https://rinya.geospatial.jp/tile/csmaptile_noto/{z}/{x}/{y}.png',             maxNativeZoom: 17, attr: '<a href="https://www.geospatial.jp/ckan/dataset/2024noto_rinya">林野庁CS立体図（能登発災後）</a>' },
 ];
 /* config.js で csRelief が設定されていれば先頭に追加 */
 if (_cfg.csRelief) {
