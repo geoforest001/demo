@@ -125,9 +125,16 @@ function _taskAddRow(listDiv, lc, layer) {
 
   var sw = document.createElement('span');
   sw.className = 'task-layer-sw';
-  sw.style.background = lc.type === 'raster'
-    ? 'linear-gradient(to right,#66caff,#f8fc41,#fc0707)'
-    : (lc.strokeColor || '#9c27b0');
+  if (lc.type === 'raster') {
+    sw.style.background = 'linear-gradient(to right,#66caff,#f8fc41,#fc0707)';
+  } else if (lc.categories && lc.categories.length) {
+    var stops = lc.categories.map(function(c, i) {
+      return c.fillColor + ' ' + Math.round(i * 100 / (lc.categories.length - 1 || 1)) + '%';
+    }).join(',');
+    sw.style.background = 'linear-gradient(to right,' + stops + ')';
+  } else {
+    sw.style.background = lc.strokeColor || '#9c27b0';
+  }
 
   var name = document.createElement('span');
   name.textContent = lc.name;
@@ -136,6 +143,22 @@ function _taskAddRow(listDiv, lc, layer) {
   row.appendChild(sw);
   row.appendChild(name);
   listDiv.appendChild(row);
+
+  /* カテゴリ凡例 */
+  if (lc.categories && lc.categories.length) {
+    lc.categories.forEach(function(cat) {
+      var leg = document.createElement('div');
+      leg.className = 'task-layer-legend';
+      var dot = document.createElement('span');
+      dot.className = 'task-layer-legend-dot';
+      dot.style.background = cat.fillColor;
+      var lbl = document.createElement('span');
+      lbl.textContent = cat.label || cat.value;
+      leg.appendChild(dot);
+      leg.appendChild(lbl);
+      listDiv.appendChild(leg);
+    });
+  }
 }
 
 /* ラスタ PMTiles レイヤ生成（オーバーズーム対応） */
@@ -187,7 +210,24 @@ async function _taskLoadRasterPMTiles(lc) {
 function _taskLoadPMTiles(lc) {
   var geomType = (lc.geometryType || 'polygon').toLowerCase();
   var paintRules = [];
-  if (geomType === 'line') {
+
+  if (lc.categories && lc.categories.length) {
+    /* カテゴリ別カラー */
+    var catField = lc.categoryField;
+    lc.categories.forEach(function(cat) {
+      (function(val, fill) {
+        paintRules.push({
+          dataLayer: lc.dataLayer,
+          filter: function(zoom, feature) { return feature.props[catField] == val; },
+          symbolizer: new protomapsL.PolygonSymbolizer({
+            fill: fill,
+            stroke: lc.strokeColor || '#232323',
+            width: lc.strokeWidth || 1,
+          }),
+        });
+      })(cat.value, cat.fillColor);
+    });
+  } else if (geomType === 'line') {
     paintRules.push({
       dataLayer: lc.dataLayer,
       symbolizer: new protomapsL.LineSymbolizer({
