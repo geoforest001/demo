@@ -1000,10 +1000,18 @@ function _addWaypoint(latlng, comment, photoData) {
   photoData = photoData || null;
   const ts = new Date().toISOString();
   const hasPhoto = !!photoData;
-  const marker = L.circleMarker([latlng.lat, latlng.lng], {
-    radius: 9, color: hasPhoto ? '#1565c0' : '#e65100',
-    fillColor: hasPhoto ? '#42a5f5' : '#ff9800', fillOpacity: 0.95, weight: 2, pane: 'gpxPane'
-  }).addTo(map);
+  var marker;
+  if (hasPhoto) {
+    var photoIcon = L.divIcon({
+      html: '<svg width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C8 0 2 6.3 2 14c0 10 14 26 14 26s14-16 14-26C30 6.3 24 0 16 0z" fill="#1565c0" stroke="white" stroke-width="1.5"/><text x="16" y="20" text-anchor="middle" font-size="13" fill="white">📷</text></svg>',
+      className: '', iconSize: [32, 40], iconAnchor: [16, 40]
+    });
+    marker = L.marker([latlng.lat, latlng.lng], { icon: photoIcon, pane: 'gpxPane' }).addTo(map);
+  } else {
+    marker = L.circleMarker([latlng.lat, latlng.lng], {
+      radius: 9, color: '#e65100', fillColor: '#ff9800', fillOpacity: 0.95, weight: 2, pane: 'gpxPane'
+    }).addTo(map);
+  }
   let popup = comment ? `<b>${hasPhoto ? '📷' : '📍'} ${comment}</b>` : (hasPhoto ? '<b>📷 写真</b>' : '');
   if (hasPhoto) popup += `<br><img src="${photoData}" style="max-width:220px;border-radius:6px;margin-top:5px;display:block">`;
   if (popup) marker.bindPopup(popup);
