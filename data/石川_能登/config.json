@@ -6,6 +6,7 @@
     {
       "name": "Morido_mokushi_2026WM",
       "type": "pmtiles",
+      "opacity": 0.8,
       "url": "data/石川_能登/morido_mokushi.pmtiles",
       "dataLayer": "morido_mokushi",
       "geometryType": "polygon",

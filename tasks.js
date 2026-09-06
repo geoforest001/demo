@@ -206,16 +206,34 @@ async function _taskLoadRasterPMTiles(lc) {
   return new RasterLayer({ opacity: lc.opacity !== undefined ? lc.opacity : 0.75, maxZoom: 22 });
 }
 
+/* 色文字列にアルファを適用するヘルパー */
+function _colorWithAlpha(color, alpha) {
+  if (alpha === undefined || alpha >= 1) return color;
+  var m = color.match(/^#([0-9a-f]{6})$/i);
+  if (m) {
+    var r = parseInt(m[1].slice(0,2),16), g = parseInt(m[1].slice(2,4),16), b = parseInt(m[1].slice(4,6),16);
+    return 'rgba('+r+','+g+','+b+','+alpha+')';
+  }
+  m = color.match(/^rgba?\(([^)]+)\)$/);
+  if (m) {
+    var parts = m[1].split(',').map(parseFloat);
+    parts[3] = alpha;
+    return 'rgba('+parts.slice(0,4).join(',')+')';
+  }
+  return color;
+}
+
 /* PMTiles レイヤ生成 */
 function _taskLoadPMTiles(lc) {
   var geomType = (lc.geometryType || 'polygon').toLowerCase();
+  var layerOpacity = lc.opacity !== undefined ? lc.opacity : 1;
   var paintRules = [];
 
   if (lc.categories && lc.categories.length) {
     /* カテゴリ別カラー: fill関数でLanduse値ごとに色を返す */
     var catField = lc.categoryField;
     var catMap = {};
-    lc.categories.forEach(function(cat) { catMap[cat.value] = cat.fillColor; });
+    lc.categories.forEach(function(cat) { catMap[cat.value] = _colorWithAlpha(cat.fillColor, layerOpacity); });
     paintRules.push({
       dataLayer: lc.dataLayer,
       symbolizer: new protomapsL.PolygonSymbolizer({
