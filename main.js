@@ -1008,9 +1008,10 @@ function _addWaypoint(latlng, comment, photoData) {
     });
     marker = L.marker([latlng.lat, latlng.lng], { icon: photoIcon, pane: 'gpxPane' }).addTo(map);
   } else {
-    marker = L.circleMarker([latlng.lat, latlng.lng], {
-      radius: 9, color: '#e65100', fillColor: '#ff9800', fillOpacity: 0.95, weight: 2, pane: 'gpxPane'
-    }).addTo(map);
+    var pinIcon = L.divIcon({
+      html: '📍', className: 'emoji-marker', iconSize: [28, 28], iconAnchor: [14, 28]
+    });
+    marker = L.marker([latlng.lat, latlng.lng], { icon: pinIcon, pane: 'gpxPane' }).addTo(map);
   }
   let popup = comment ? `<b>${hasPhoto ? '📷' : '📍'} ${comment}</b>` : (hasPhoto ? '<b>📷 写真</b>' : '');
   if (hasPhoto) popup += `<br><img src="${photoData}" style="max-width:220px;border-radius:6px;margin-top:5px;display:block">`;
