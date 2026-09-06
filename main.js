@@ -339,9 +339,15 @@ function renderLayerControl() {
   function openPanel() {
     panel.classList.remove('lc-hidden');
     openBtn.style.display = 'none';
-    /* ゴーストクリック対策: 開いた直後500ms は✕ボタンを無効化 */
-    closeBtn.disabled = true;
-    setTimeout(function() { closeBtn.disabled = false; }, 500);
+    /* ゴーストクリック対策:
+       ① pointer-events:none でhit-testから除外（disabledはiOSで無効）
+       ② 次の click をキャプチャ段階で飲み込む */
+    closeBtn.style.pointerEvents = 'none';
+    document.addEventListener('click', function swallow(e) {
+      e.stopPropagation(); e.preventDefault();
+      document.removeEventListener('click', swallow, true);
+    }, true);
+    setTimeout(function() { closeBtn.style.pointerEvents = ''; }, 600);
   }
   function closePanel() { panel.classList.add('lc-hidden');    openBtn.style.display = 'block'; }
   L.DomEvent
