@@ -1,0 +1,63 @@
+{
+  "name": "石川_加賀",
+  "center": [36.3054, 136.4485],
+  "zoom": 13,
+  "layers": [
+    {
+      "name": "CS立体図",
+      "type": "raster",
+      "url": "data/石川_加賀/cs.pmtiles",
+      "opacity": 1.0
+    },
+    {
+      "name": "SHC（r100）",
+      "type": "raster",
+      "url": "data/石川_加賀/shc_r100.pmtiles",
+      "opacity": 0.3
+    },
+    {
+      "name": "谷密度",
+      "type": "raster",
+      "url": "data/石川_加賀/tanimitsu.pmtiles",
+      "opacity": 0.3
+    },
+    {
+      "name": "谷線",
+      "type": "pmtiles",
+      "url": "data/石川_加賀/valley.pmtiles",
+      "dataLayer": "valley",
+      "geometryType": "line",
+      "strokeColor": "#1b5ea8",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "AI盛土",
+      "type": "pmtiles",
+      "url": "data/石川_加賀/ai_morido.pmtiles",
+      "dataLayer": "ai_morido",
+      "geometryType": "polygon",
+      "strokeColor": "#ebff00",
+      "fillColor": "rgba(235,255,0,0.3)",
+      "strokeWidth": 1.5
+    },
+    {
+      "name": "AIダム",
+      "type": "pmtiles",
+      "url": "data/石川_加賀/ai_dam.pmtiles",
+      "dataLayer": "ai_dam",
+      "geometryType": "polygon",
+      "strokeColor": "#232323",
+      "fillColor": "rgba(49,0,255,0.5)",
+      "strokeWidth": 1
+    },
+    {
+      "name": "AI道路",
+      "type": "pmtiles",
+      "url": "data/石川_加賀/ai_road.pmtiles",
+      "dataLayer": "ai_road",
+      "geometryType": "line",
+      "strokeColor": "#000000",
+      "strokeWidth": 2
+    }
+  ]
+}
