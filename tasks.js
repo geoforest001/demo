@@ -212,20 +212,20 @@ function _taskLoadPMTiles(lc) {
   var paintRules = [];
 
   if (lc.categories && lc.categories.length) {
-    /* カテゴリ別カラー */
+    /* カテゴリ別カラー: fill関数でLanduse値ごとに色を返す */
     var catField = lc.categoryField;
-    lc.categories.forEach(function(cat) {
-      (function(val, fill) {
-        paintRules.push({
-          dataLayer: lc.dataLayer,
-          filter: function(zoom, feature) { return feature.props[catField] == val; },
-          symbolizer: new protomapsL.PolygonSymbolizer({
-            fill: fill,
-            stroke: lc.strokeColor || '#232323',
-            width: lc.strokeWidth || 1,
-          }),
-        });
-      })(cat.value, cat.fillColor);
+    var catMap = {};
+    lc.categories.forEach(function(cat) { catMap[cat.value] = cat.fillColor; });
+    paintRules.push({
+      dataLayer: lc.dataLayer,
+      symbolizer: new protomapsL.PolygonSymbolizer({
+        fill: function(zoom, feature) {
+          var v = feature.props[catField];
+          return catMap[v] || catMap[String(v)] || 'rgba(0,0,0,0)';
+        },
+        stroke: lc.strokeColor || '#232323',
+        width: lc.strokeWidth || 1,
+      }),
     });
   } else if (geomType === 'line') {
     paintRules.push({
