@@ -1151,6 +1151,11 @@ async function _showSurveyManager() {
         const id = parseInt(btn.dataset.id); const s = surveys.find(x => x.id === id);
         if (!s || !confirm(`「${s.name}」を削除しますか？`)) return;
         await _idbDelete(id); surveys = surveys.filter(x => x.id !== id);
+        if (id === _surveyId) {
+          _trackSegments = []; _trackLines.forEach(l => { try { map.removeLayer(l); } catch(_){} }); _trackLines = [];
+          _clearWaypoints(); _surveyId = null; _surveyName = ''; _surveyFolderId = null; _surveyStartedAt = null;
+          ov.remove(); _buildTrackCtrl(); return;
+        }
         ov.querySelector('#surveyGroupedList').innerHTML = renderGrouped();
       } else if (action === 'folder-zip') {
         const fid = parseInt(btn.dataset.folderId); const fs = surveys.filter(s => s.folderId === fid);
