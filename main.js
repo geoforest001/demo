@@ -89,7 +89,7 @@ const CS_PRESETS = [
   { label: '岡山県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_okayama/{z}/{x}/{y}.png',                 maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
   { label: '愛媛県',     url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_ehime/{z}/{x}/{y}.png',                   maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
   { label: '熊本・大分', url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_kumamoto_oita/{z}/{x}/{y}.png',           maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
-  { label: '能登地域',   url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_noto/{z}/{x}/{y}.png',                   maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
+  { label: '能登地域2022', url: 'https://www2.ffpri.go.jp/soilmap/tile/cs_noto/{z}/{x}/{y}.png',                 maxNativeZoom: 17, attr: '<a href="https://www2.ffpri.go.jp/soilmap/data-src.html">森林総合研究所CS立体図</a>' },
 ];
 /* config.js で csRelief が設定されていれば先頭に追加 */
 if (_cfg.csRelief) {
