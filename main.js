@@ -336,7 +336,13 @@ function renderLayerControl() {
   openBtn.className = 'lc-open-btn'; openBtn.textContent = 'レイヤメニュー';
   document.body.appendChild(openBtn);
 
-  function openPanel()  { panel.classList.remove('lc-hidden'); openBtn.style.display = 'none'; }
+  function openPanel() {
+    panel.classList.remove('lc-hidden');
+    openBtn.style.display = 'none';
+    /* ゴーストクリック対策: 開いた直後500ms は✕ボタンを無効化 */
+    closeBtn.disabled = true;
+    setTimeout(function() { closeBtn.disabled = false; }, 500);
+  }
   function closePanel() { panel.classList.add('lc-hidden');    openBtn.style.display = 'block'; }
   L.DomEvent
     .on(closeBtn, 'mousedown dblclick touchstart', L.DomEvent.stopPropagation)
