@@ -100,9 +100,11 @@ async function _loadTask(taskId, listDiv) {
   }
 
   if (cfg.center) {
-    map.flyTo(cfg.center, cfg.zoom || 13, { duration: 1.2 });
+    /* flyToはiOS pickerのviewport変化でinvalidateSize→stop()されキャンセルされるため
+       setViewで即時移動し、その後アニメーション不要な状態にする */
+    map.setView(cfg.center, cfg.zoom || 13, { animate: false });
   } else if (bounds) {
-    map.fitBounds(bounds, { padding: [40, 40] });
+    map.fitBounds(bounds, { padding: [40, 40], animate: false });
   }
   toast((cfg.name || taskId) + ' を読み込みました', 2000);
 }
