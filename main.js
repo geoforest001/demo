@@ -1018,6 +1018,7 @@ function _addWaypoint(latlng, comment, photoData) {
   if (popup) marker.bindPopup(popup);
   _waypoints.push({ lat: latlng.lat, lng: latlng.lng, comment, ts, photoData, marker });
   _autoSaveSurvey();
+  _buildTrackCtrl();
 }
 function _clearWaypoints() {
   _waypoints.forEach(w => { try { map.removeLayer(w.marker); } catch (_) {} });
