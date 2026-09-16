@@ -864,9 +864,11 @@ let _trackSegments = [], _trackLines = [], _trackActive = false, _importedTrackL
 let currentLocationMarker = null, currentLocationCircle = null, _lastKnownPos = null;
 let _watchId = null, _follow = false, _gpsInitDone = false, _lastProgrammaticPan = 0;
 let _lastTrackPoint = null;
+let _wakeLock = null;
 
-const GPS_MAX_LOG_ACCURACY = 50;
-const GPS_MAX_JUMP_SPEED   = 50;
+const GPS_MAX_LOG_ACCURACY  = 50;
+const GPS_MAX_JUMP_SPEED    = 50;
+const GPS_GAP_THRESHOLD_MS  = 30000; /* 30秒以上空いたら新セグメント */
 
 function _latLngDistM(lat1, lng1, lat2, lng2) {
   const R = 6371000;
@@ -1347,11 +1349,11 @@ function _buildTrackCtrl() {
     info.textContent = `🔴 記録中 ${_totalPoints()}点${wptPart}${segCount > 1 ? ' (' + segCount + '区間)' : ''}`;
     div.appendChild(info);
     const stopBtn = document.createElement('button'); stopBtn.className = 'track-btn'; stopBtn.textContent = '⏹ 停止';
-    stopBtn.onclick = () => { _trackActive = false; _autoSaveSurvey(); _buildTrackCtrl(); };
+    stopBtn.onclick = () => { _trackActive = false; _releaseWakeLock(); _autoSaveSurvey(); _buildTrackCtrl(); };
     div.appendChild(stopBtn);
   } else if (_totalPoints() > 0 || _waypoints.length > 0) {
     const resumeBtn = document.createElement('button'); resumeBtn.className = 'track-btn'; resumeBtn.textContent = '⏺ 続けてログ開始';
-    resumeBtn.onclick = () => { _trackSegments.push([]); _lastTrackPoint = null; _trackActive = true; _startGPS(); toast('新しい区間を開始しました', 1500); _buildTrackCtrl(); };
+    resumeBtn.onclick = () => { _trackSegments.push([]); _lastTrackPoint = null; _trackActive = true; _startGPS(); _acquireWakeLock(); toast('新しい区間を開始しました', 1500); _buildTrackCtrl(); };
     div.appendChild(resumeBtn);
     const gpxBtn = document.createElement('button'); gpxBtn.className = 'track-btn'; gpxBtn.textContent = '💾 GPX書き出し';
     gpxBtn.onclick = _exportCurrentGPX; div.appendChild(gpxBtn);
@@ -1360,12 +1362,12 @@ function _buildTrackCtrl() {
     const clrBtn = document.createElement('button'); clrBtn.className = 'track-btn'; clrBtn.textContent = '🗑 消去';
     clrBtn.onclick = () => {
       _trackSegments = []; _trackLines.forEach(l => { if (l) map.removeLayer(l); }); _trackLines = [];
-      _clearWaypoints(); _surveyId = null; _surveyName = ''; _surveyFolderId = null; _surveyStartedAt = null; _buildTrackCtrl();
+      _clearWaypoints(); _surveyId = null; _surveyName = ''; _surveyFolderId = null; _surveyStartedAt = null; _releaseWakeLock(); _buildTrackCtrl();
     };
     div.appendChild(clrBtn);
   } else {
     const startBtn = document.createElement('button'); startBtn.className = 'track-btn'; startBtn.textContent = '⏺ ログ開始';
-    startBtn.onclick = () => { _surveyStartedAt = new Date().toISOString(); _surveyId = null; _trackSegments.push([]); _lastTrackPoint = null; _trackActive = true; _startGPS(); toast('ログ記録を開始しました', 1500); _buildTrackCtrl(); };
+    startBtn.onclick = () => { _surveyStartedAt = new Date().toISOString(); _surveyId = null; _trackSegments.push([]); _lastTrackPoint = null; _trackActive = true; _startGPS(); _acquireWakeLock(); toast('ログ記録を開始しました', 1500); _buildTrackCtrl(); };
     div.appendChild(startBtn);
     _appendImportBtn(div);
     const mgrBtn = document.createElement('button'); mgrBtn.className = 'track-btn'; mgrBtn.textContent = '🗂 管理';
@@ -1446,9 +1448,19 @@ function _startGPS() {
       if (currentLocationCircle) map.removeLayer(currentLocationCircle);
       if (pos.coords.accuracy) { currentLocationCircle = L.circle(latlng, { radius: pos.coords.accuracy, color: '#2979ff', weight: 1, fillColor: '#2979ff', fillOpacity: 0.1 }).addTo(map); }
       if (_trackActive) {
+        const acc = pos.coords.accuracy || 999, lat = pos.coords.latitude, lng = pos.coords.longitude, ts = pos.timestamp;
+        /* ③ギャップ検出: 前点から30秒以上空いたら自動で新セグメント */
+        if (_lastTrackPoint) {
+          const gapMs = ts - new Date(_lastTrackPoint.ts).getTime();
+          if (gapMs > GPS_GAP_THRESHOLD_MS) {
+            _trackSegments.push([]);
+            _lastTrackPoint = null;
+            toast(`${Math.round(gapMs / 1000)}秒のギャップを検出、新区間を開始`, 2000);
+            _buildTrackCtrl();
+          }
+        }
         const seg = _currentSeg();
         if (seg) {
-          const acc = pos.coords.accuracy || 999, lat = pos.coords.latitude, lng = pos.coords.longitude, ts = pos.timestamp;
           const info = document.getElementById('trackInfo'); const segCount = _trackSegments.length; let skip = false;
           if (acc > GPS_MAX_LOG_ACCURACY) skip = true;
           if (!skip && _lastTrackPoint) {
@@ -1465,6 +1477,28 @@ function _startGPS() {
     { enableHighAccuracy: _isMobile, timeout: 30000, maximumAge: 5000 }
   );
 }
+
+/* ─── Wake Lock ─── */
+async function _acquireWakeLock() {
+  if (!('wakeLock' in navigator) || _wakeLock) return;
+  try {
+    _wakeLock = await navigator.wakeLock.request('screen');
+    _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+  } catch (_) {}
+}
+function _releaseWakeLock() {
+  if (_wakeLock) { try { _wakeLock.release(); } catch (_) {} _wakeLock = null; }
+}
+
+/* ② バックグラウンド復帰時にGPSウォッチを再起動 */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (_trackActive) _acquireWakeLock();
+  if (!navigator.geolocation) return;
+  /* watchPositionはバックグラウンドで止まることがあるため再起動 */
+  if (_watchId !== null) { navigator.geolocation.clearWatch(_watchId); _watchId = null; }
+  _startGPS();
+});
 
 /* ─── スケールバー ─── */
 L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
