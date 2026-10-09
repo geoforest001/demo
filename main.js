@@ -191,6 +191,83 @@ function _buildLabelRules(dataLayer){
   }
 }
 
+/* ─── bridge 山地レイヤ（https://geoforest001.github.io/bridge/）─── */
+const _BRIDGE_DATA = 'https://geoforest001.github.io/bridge_data/data/';
+
+const _BRIDGE_LAYERS = (function() {
+  var SEGYO_URL = _BRIDGE_DATA + 'segyohan.pmtiles';
+
+  function _mkLayer(url, maxDZ, paintRules, labelRules) {
+    return protomapsL.leafletLayer({
+      url: url, attribution: '© ジオ・フォレスト', maxDataZoom: maxDZ,
+      paintRules: paintRules, labelRules: labelRules || []
+    });
+  }
+
+  var SP_DEFS = [
+    { key:'アカマツ',      fill:'rgba(220,0,0,0.5)',      stroke:'#DD0000', match:['アカマツ'] },
+    { key:'カラマツ',      fill:'rgba(80,200,0,0.5)',     stroke:'#50C800', match:['カラマツ'] },
+    { key:'スギ',          fill:'rgba(0,100,255,0.5)',    stroke:'#0064FF', match:['スギ'] },
+    { key:'ヒノキ・サワラ', fill:'rgba(0,110,45,0.5)',   stroke:'#006E2D', match:['ヒノキ','サワラ'] },
+    { key:'ナラ類',        fill:'rgba(255,140,0,0.5)',    stroke:'#FF8C00', match:['ナラ類','クヌギ','ブナ'] },
+    { key:'その他広葉樹',  fill:'rgba(255,200,100,0.12)', stroke:'#CC7000', match:['その他広'] },
+    { key:'その他針',      fill:'rgba(100,150,255,0.12)', stroke:'#0050CC', match:['その他針'] },
+  ];
+
+  var TACHIKI_SP = { 'アカマツ':'#F00E0E', 'カラマツ':'#6BA825', 'スギ':'#1509F3', 'ヒノキ':'#33A02C' };
+  var TACHIKI_BINS = [[30,7.5],[25,5.5],[20,4.0],[15,2.8]];
+  var tachikiRules = [];
+  Object.entries(TACHIKI_SP).forEach(function(e) {
+    var sp = e[0], fill = e[1];
+    TACHIKI_BINS.forEach(function(b) {
+      tachikiRules.push({
+        dataLayer: 'tachiki',
+        filter: (function(sp2,hMin){ return function(z,f){ return f.props.SP===sp2 && f.props.H>=hMin; }; })(sp, b[0]),
+        symbolizer: new protomapsL.CircleSymbolizer({ radius: b[1], fill: fill, stroke: '#333', width: 0.4, opacity: 0.9 })
+      });
+    });
+  });
+
+  var layers = [
+    { label:'伊那谷盛り土',   color:'rgb(200,170,0)', type:'poly',
+      layer: _mkLayer(_BRIDGE_DATA+'morido.pmtiles',     16, [{ dataLayer:'morido',     symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(255,245,60,0.75)', stroke:'rgb(200,170,0)', width:1   }) }]) },
+    { label:'能登盛り土',     color:'rgb(200,170,0)', type:'poly',
+      layer: _mkLayer(_BRIDGE_DATA+'noto_morido.pmtiles',16, [{ dataLayer:'noto_morido',symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(255,245,60,0.75)', stroke:'rgb(200,170,0)', width:1   }) }]) },
+    { label:'流向ライン5m',   color:'#29B6F6',        type:'line',
+      layer: _mkLayer(_BRIDGE_DATA+'d8_5m.pmtiles',      16, [{ dataLayer:'d8_5m',      symbolizer: new protomapsL.LineSymbolizer({ color:'#29B6F6', width:1.5 }) }]) },
+    { label:'林班（上伊那）', color:'#2E7D32',        type:'poly',
+      layer: _mkLayer(_BRIDGE_DATA+'rinpan.pmtiles',     14, [{ dataLayer:'rinpan',     symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(46,125,50,0.08)',  stroke:'#2E7D32', width:3.5 }) }], _buildLabelRules('rinpan')) },
+    { label:'小班（上伊那）', color:'#1565C0',        type:'poly',
+      layer: _mkLayer(_BRIDGE_DATA+'shohan.pmtiles',     14, [{ dataLayer:'shohan',     symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(21,101,192,0.06)', stroke:'#1565C0', width:1.5 }) }], _buildLabelRules('shohan')) },
+    { label:'施業班（上伊那）',color:'#C62828',       type:'poly',
+      layer: _mkLayer(SEGYO_URL,                         14, [{ dataLayer:'segyohan',   symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(198,40,40,0.05)', stroke:'#C62828', width:0.6 }) }], _buildLabelRules('segyohan')) },
+  ];
+
+  SP_DEFS.forEach(function(def) {
+    layers.push({ label:'　└ '+def.key, color:def.stroke, type:'poly',
+      layer: _mkLayer(SEGYO_URL, 14, [{
+        dataLayer:'segyohan',
+        filter: (function(m){ return function(z,f){ var d=(f.props.JUSHU||'').split('・')[0]; return m.indexOf(d)!==-1; }; })(def.match),
+        symbolizer: new protomapsL.PolygonSymbolizer({ fill:def.fill, stroke:def.stroke, width:0.6 })
+      }])
+    });
+  });
+
+  layers.push(
+    { label:'保安林（上伊那）', color:'#0099CC', type:'poly',
+      layer: _mkLayer(SEGYO_URL, 14, [
+        { dataLayer:'segyohan', filter:function(z,f){ var h=(f.props.HORIN||'').split('・')[0]; return h==='水かん'; },                                                  symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(0,180,240,0.45)',  stroke:'#0099CC', width:0.7 }) },
+        { dataLayer:'segyohan', filter:function(z,f){ var h=(f.props.HORIN||'').split('・')[0]; return h==='土流'||h==='土崩'||h==='土保'; },                           symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(150,90,30,0.45)',  stroke:'#8B5A1E', width:0.7 }) },
+        { dataLayer:'segyohan', filter:function(z,f){ var h=(f.props.HORIN||'').split('・')[0]; return h==='保健'; },                                                    symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(0,160,80,0.45)',   stroke:'#009950', width:0.7 }) },
+        { dataLayer:'segyohan', filter:function(z,f){ var h=(f.props.HORIN||'').split('・')[0]; return h!==''&&['水かん','土流','土崩','土保','保健'].indexOf(h)===-1; }, symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(140,0,200,0.45)',  stroke:'#8000BB', width:0.7 }) },
+      ]) },
+    { label:'施業区域内立木', color:'#1509F3', type:'circle',
+      layer: _mkLayer(_BRIDGE_DATA+'tachiki.pmtiles', 17, tachikiRules) }
+  );
+
+  return layers;
+})();
+
 /* ─── PMTilesレイヤを config から生成 ─── */
 window.pmLayers = {};
 
@@ -603,6 +680,43 @@ function renderLayerControl() {
 
   /* ── 業務レイヤセレクター（森林レイヤと気象レイヤの間） ── */
   if (window.initTaskSelector) initTaskSelector(overlaysDiv);
+
+  /* ── 山地レイヤ セクション ── */
+  (function() {
+    var mtSep = document.createElement('div');
+    mtSep.className = 'leaflet-control-layers-separator';
+    var mtLbl = document.createElement('div');
+    mtLbl.className = 'lc-section-label lc-section-collapsed';
+    mtLbl.style.cssText = 'display:flex;align-items:center;cursor:pointer';
+    mtLbl.innerHTML = '<span class="lc-section-arrow">▾</span>&nbsp;山地レイヤ';
+    var mtDiv = document.createElement('div');
+    _BRIDGE_LAYERS.forEach(function(def) {
+      var row = document.createElement('label');
+      row.style.cssText = 'display:none;padding:2px 0 2px 4px;align-items:center;gap:4px';
+      var chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.addEventListener('change', function() {
+        if (this.checked) def.layer.addTo(map);
+        else map.removeLayer(def.layer);
+      });
+      var swatch = document.createElement('span');
+      swatch.className = 'lgnd-swatch ' + (def.type === 'line' ? 'lgnd-line' : 'lgnd-poly');
+      swatch.style.background = def.color;
+      var txt = document.createElement('span');
+      txt.textContent = def.label;
+      row.append(chk, swatch, txt);
+      mtDiv.appendChild(row);
+    });
+    mtLbl.addEventListener('click', function() {
+      var collapsed = this.classList.toggle('lc-section-collapsed');
+      mtDiv.querySelectorAll('label').forEach(function(el) {
+        el.style.display = collapsed ? 'none' : '';
+      });
+    });
+    lcList.appendChild(mtSep);
+    lcList.appendChild(mtLbl);
+    lcList.appendChild(mtDiv);
+  })();
 
   if (window.innerWidth < 768) closePanel();
 }
