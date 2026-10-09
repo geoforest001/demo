@@ -231,8 +231,6 @@ const _BRIDGE_LAYERS = (function() {
   var layers = [
     { label:'伊那谷盛り土',   color:'rgb(200,170,0)', type:'poly',
       layer: _mkLayer(_BRIDGE_DATA+'morido.pmtiles',     16, [{ dataLayer:'morido',     symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(255,245,60,0.75)', stroke:'rgb(200,170,0)', width:1   }) }]) },
-    { label:'能登盛り土',     color:'rgb(200,170,0)', type:'poly',
-      layer: _mkLayer(_BRIDGE_DATA+'noto_morido.pmtiles',16, [{ dataLayer:'noto_morido',symbolizer: new protomapsL.PolygonSymbolizer({ fill:'rgba(255,245,60,0.75)', stroke:'rgb(200,170,0)', width:1   }) }]) },
     { label:'流向ライン5m',   color:'#29B6F6',        type:'line',
       layer: _mkLayer(_BRIDGE_DATA+'d8_5m.pmtiles',      16, [{ dataLayer:'d8_5m',      symbolizer: new protomapsL.LineSymbolizer({ color:'#29B6F6', width:1.5 }) }]) },
     { label:'林班（上伊那）', color:'#2E7D32',        type:'poly',
@@ -700,10 +698,10 @@ function renderLayerControl() {
       chk.addEventListener('change', function() {
         if (this.checked) def.layer.addTo(map);
         else map.removeLayer(def.layer);
-        // 施業班（index 5）の変更で子レイヤ（6-12）を連動
-        if (idx === 5) {
+        // 施業班（index 4）の変更で子レイヤ（5-11）を連動
+        if (idx === 4) {
           var on = this.checked;
-          for (var ci = 6; ci <= 12; ci++) {
+          for (var ci = 5; ci <= 11; ci++) {
             if (!chks[ci] || chks[ci].checked === on) continue;
             chks[ci].checked = on;
             chks[ci].dispatchEvent(new Event('change'));
