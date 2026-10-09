@@ -864,3 +864,157 @@ table.xl-popup .xl-row th { color: #0066ff; }
   font-size: 22px; line-height: 1;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* ===== 連絡掲示板 BBS ===== */
+#bbsFloatBtn {
+  position: fixed; top: 80px; right: 10px; z-index: 9000;
+  background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 20px; padding: 6px 14px; overflow: visible;
+  font-size: 12px; font-family: sans-serif; font-weight: bold; color: #333;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.15); white-space: nowrap;
+  -webkit-tap-highlight-color: transparent; transition: background .15s, border-color .15s, color .15s;
+  user-select: none;
+}
+#bbsFloatBtn:active { background: #f0f0f0; }
+#bbsFloatBtn.active { background: #eef4ff; border-color: #9bbfff; color: #0044cc; }
+#bbsBadge {
+  position: absolute; top: -5px; right: -5px; width: 14px; height: 14px;
+  background: #e53935; border-radius: 50%; border: 2px solid #fff;
+  display: none; pointer-events: none;
+}
+#bbsPanel {
+  position: fixed; top: 80px; right: 10px; z-index: 9100;
+  background: rgba(255,255,255,0.97); border: 1px solid rgba(0,0,0,0.13);
+  border-radius: 14px; display: none; flex-direction: column;
+  font-family: sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  width: min(300px, calc(100vw - 56px)); max-height: 70vh; overflow: hidden;
+  touch-action: none;
+}
+#bbsHandle {
+  display: flex; align-items: center; padding: 7px 12px 6px;
+  background: #f4f4f4; border-radius: 14px 14px 0 0;
+  border-bottom: 1px solid #e8e8e8; cursor: grab; user-select: none; gap: 8px;
+}
+#bbsHandle:active { cursor: grabbing; }
+#bbsHandleGrip { display: flex; flex-direction: column; gap: 3px; flex-shrink: 0; }
+#bbsHandleGrip span { display: block; width: 20px; height: 2px; background: #bbb; border-radius: 1px; }
+#bbsPanelTitle { font-size: 11px; color: #888; flex: 1; }
+#bbsLogBtn, #bbsRefreshBtn, #bbsClose, #bbsCollapseBtn {
+  flex-shrink: 0; width: 22px; height: 22px; background: #ddd; border: none;
+  border-radius: 50%; font-size: 12px; line-height: 22px; text-align: center;
+  cursor: pointer; color: #666; padding: 0; -webkit-tap-highlight-color: transparent;
+}
+#bbsLogBtn:active, #bbsRefreshBtn:active, #bbsClose:active, #bbsCollapseBtn:active { background: #bbb; }
+#bbsCollapseBtn { font-size: 10px; transition: transform .25s; }
+#bbsPanel.collapsed #bbsCollapseBtn { transform: rotate(180deg); }
+#bbsBody {
+  display: flex; flex-direction: column; overflow: hidden;
+  max-height: calc(70vh - 36px); transition: max-height .28s cubic-bezier(.4,0,.2,1);
+}
+#bbsPanel.collapsed #bbsBody { overflow: hidden; max-height: 0 !important; }
+#bbsAuthorBar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  padding: 7px 12px; background: #f9f9f9; border-bottom: 1px solid #eee;
+  font-family: sans-serif; flex-shrink: 0;
+}
+#bbsAuthorBarLabel { font-size: 11px; color: #888; }
+#bbsAuthorBarInfo { font-size: 12px; font-weight: bold; color: #333; flex: 1; }
+#bbsAuthorEditBtn {
+  font-size: 12px; padding: 2px 7px; border: 1px solid #ddd;
+  border-radius: 6px; background: #f0f0f0; cursor: pointer;
+}
+#bbsAuthorEditor {
+  display: none; align-items: center; gap: 6px;
+  padding: 6px 12px; background: #f9f9f9; border-bottom: 1px solid #eee; flex-shrink: 0;
+}
+#bbsAuthorInput {
+  flex: 1; border: 1px solid #ddd; border-radius: 7px; padding: 5px 8px; font-size: 12px;
+}
+#bbsAuthorSaveBtn {
+  padding: 5px 12px; background: #0066ff; color: #fff; border: none;
+  border-radius: 7px; font-size: 12px; font-weight: bold; cursor: pointer;
+}
+.bbs-pane { overflow-y: auto; padding: 8px 10px 16px; }
+#bbsListPane { display: flex; flex-direction: column; overflow: hidden; padding: 0 10px; }
+#bbsList { overflow-y: auto; flex: 1; padding-bottom: 16px; }
+#bbsNewBtn {
+  display: block; width: 100%; padding: 10px; margin: 8px 0 6px; flex-shrink: 0;
+  background: #ef6c00; color: #fff; border: none; border-radius: 9px;
+  font-size: 13px; font-weight: bold; font-family: sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+#bbsNewBtn:active { background: #e65100; }
+#bbsLoadingMsg, #bbsEmptyMsg { text-align: center; color: #999; font-size: 12px; padding: 24px 0; }
+.bbs-card {
+  border: 1px solid #eee; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.bbs-card-header { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; flex-wrap: wrap; }
+.bbs-cat-badge {
+  font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 8px; white-space: nowrap;
+}
+.bbs-time { font-size: 10px; color: #aaa; flex: 1; }
+.bbs-icon-btn {
+  font-size: 11px; padding: 2px 6px; border: 1px solid #ddd; border-radius: 6px;
+  background: #f8f8f8; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.bbs-author { font-size: 10px; color: #666; margin-top: 3px; }
+.bbs-comment { font-size: 12px; color: #222; margin-bottom: 5px; line-height: 1.5; white-space: pre-wrap; }
+.bbs-photo { max-width: 100%; max-height: 120px; border-radius: 6px; cursor: pointer; display: block; margin-top: 4px; object-fit: cover; }
+.bbs-loc { font-size: 10px; color: #888; margin-top: 3px; }
+.bbs-type-big-btn {
+  display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px;
+  margin-bottom: 10px; border: none; border-radius: 12px; font-family: sans-serif;
+  font-size: 14px; font-weight: bold; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  text-align: left; color: #fff;
+}
+.bbs-type-big-btn[data-type="notice"]  { background: #1565C0; }
+.bbs-type-big-btn[data-type="finding"] { background: #2E7D32; }
+.bbs-type-big-btn[data-type="consult"] { background: #6A1B9A; }
+.bbs-type-big-btn:active { filter: brightness(.9); }
+.bbs-tbig-icon { font-size: 22px; flex-shrink: 0; }
+.bbs-tbig-text { display: flex; flex-direction: column; line-height: 1.4; }
+.bbs-tbig-text small { font-size: 11px; font-weight: normal; opacity: .9; }
+.bbs-back-to-list-btn, .bbs-back-btn {
+  display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px;
+  margin-bottom: 12px; border: 1px solid #ddd; border-radius: 7px;
+  background: #f5f5f5; font-size: 12px; font-family: sans-serif;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; color: #555;
+}
+.bbs-back-btn { margin-bottom: 10px; }
+.bbs-back-to-list-btn:active, .bbs-back-btn:active { background: #e8e8e8; }
+.bbs-field { margin-bottom: 10px; }
+.bbs-field label { display: block; font-size: 10px; color: #888; margin-bottom: 3px; font-weight: bold; }
+.bbs-field textarea { width: 100%; box-sizing: border-box; border: 1px solid #ddd; border-radius: 7px; padding: 7px 9px; font-size: 12px; font-family: sans-serif; resize: vertical; }
+.bbs-action-btn {
+  padding: 6px 12px; border: 1px solid #ccc; border-radius: 7px;
+  background: #f5f5f5; font-size: 11px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+#bbsLocStatus { font-size: 10px; color: #888; margin-left: 6px; }
+#bbsSubmitBtn {
+  width: 100%; padding: 10px; background: #0066ff; color: #fff; border: none;
+  border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer;
+}
+#bbsSubmitBtn:disabled { background: #aaa; cursor: default; }
+#bbsFormStatus { font-size: 11px; color: #888; text-align: center; margin-top: 6px; min-height: 16px; }
+/* ログモーダル */
+#bbsLogModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 50000; align-items: center; justify-content: center; }
+#bbsLogModal.open { display: flex; }
+#bbsLogBox { background: #fff; border-radius: 12px; width: 90vw; max-width: 680px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 8px 40px rgba(0,0,0,.3); overflow: hidden; }
+#bbsLogModalTitle { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #37474f; color: #fff; font-size: 15px; font-weight: bold; flex-shrink: 0; }
+#bbsLogModalClose { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
+#bbsLogFilterRow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid #eee; flex-shrink: 0; }
+#bbsLogFilterRow input[type="date"] { border: 1px solid #ccc; border-radius: 5px; padding: 5px 8px; font-size: 14px; flex: 1; min-width: 120px; }
+#bbsLogSearchBtn { background: #37474f; color: #fff; border: none; border-radius: 6px; padding: 6px 16px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+#bbsLogCount { padding: 5px 14px; font-size: 12px; color: #666; border-bottom: 1px solid #eee; flex-shrink: 0; }
+#bbsLogList { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.bbs-log-row { padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; background: #f8f8f8; border-left: 3px solid #999; }
+.bbs-log-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+.bbs-log-time { font-size: 11px; color: #999; white-space: nowrap; }
+.bbs-log-badge { font-size: 11px; color: #fff; border-radius: 3px; padding: 1px 6px; white-space: nowrap; }
+.bbs-log-author { font-size: 12px; color: #555; }
+.bbs-log-content { font-size: 13px; color: #333; margin-top: 2px; }
+#bbsLogFooter { display: flex; justify-content: flex-end; gap: 10px; padding: 10px 14px; border-top: 1px solid #eee; flex-shrink: 0; }
+#bbsLogCloseBtn { background: #eee; border: none; border-radius: 6px; padding: 7px 18px; font-size: 14px; cursor: pointer; }
+#bbsLogCsvBtn   { background: #2e7d32; color: #fff; border: none; border-radius: 6px; padding: 7px 18px; font-size: 14px; cursor: pointer; }
+#bbsLogPrintBtn { background: #1565c0; color: #fff; border: none; border-radius: 6px; padding: 7px 18px; font-size: 14px; cursor: pointer; }

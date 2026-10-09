@@ -1,4 +1,4 @@
-const SW_VER = 'v36';
+const SW_VER = 'v37';
 const STATIC_CACHE  = `miyagi-static-${SW_VER}`;
 const DATA_CACHE    = `miyagi-data-${SW_VER}`;
 const TILE_CACHE    = `miyagi-tiles-${SW_VER}`;
@@ -11,6 +11,7 @@ const STATIC_PRECACHE = [
   './style.css',
   './weather.js',
   './excel.js',
+  './bbs.js',
   './manifest.json',
   './icon.svg',
 ];
