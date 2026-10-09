@@ -690,7 +690,9 @@ function renderLayerControl() {
     mtLbl.style.cssText = 'display:flex;align-items:center;cursor:pointer';
     mtLbl.innerHTML = '<span class="lc-section-arrow">▾</span>&nbsp;山地レイヤ';
     var mtDiv = document.createElement('div');
-    _BRIDGE_LAYERS.forEach(function(def) {
+    // 施業班（index 5）と子レイヤ（index 6-12）を後で参照するため先に収集
+    var chks = [];
+    _BRIDGE_LAYERS.forEach(function(def, idx) {
       var row = document.createElement('label');
       row.style.cssText = 'display:none;padding:2px 0 2px 4px;align-items:center;gap:4px';
       var chk = document.createElement('input');
@@ -698,7 +700,17 @@ function renderLayerControl() {
       chk.addEventListener('change', function() {
         if (this.checked) def.layer.addTo(map);
         else map.removeLayer(def.layer);
+        // 施業班（index 5）の変更で子レイヤ（6-12）を連動
+        if (idx === 5) {
+          var on = this.checked;
+          for (var ci = 6; ci <= 12; ci++) {
+            if (!chks[ci] || chks[ci].checked === on) continue;
+            chks[ci].checked = on;
+            chks[ci].dispatchEvent(new Event('change'));
+          }
+        }
       });
+      chks[idx] = chk;
       var swatch = document.createElement('span');
       swatch.className = 'lgnd-swatch ' + (def.type === 'line' ? 'lgnd-line' : 'lgnd-poly');
       swatch.style.background = def.color;
