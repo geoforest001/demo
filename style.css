@@ -851,6 +851,13 @@ table.xl-popup .xl-row th { color: #0066ff; }
   flex-shrink: 0; display: inline-block;
   border: 1px solid rgba(0,0,0,0.2);
 }
+.task-colorize-btn {
+  display: block; width: 100%; margin: 4px 0 6px;
+  padding: 5px 8px; font-size: 13px; text-align: left;
+  background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 6px; cursor: pointer;
+}
+.task-colorize-btn:hover { background: rgba(0,0,0,0.1); }
 .task-layer-legend {
   display: flex; align-items: center; gap: 5px;
   padding: 1px 2px 1px 20px; font-size: 11px; color: #555;

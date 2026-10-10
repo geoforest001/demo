@@ -59,6 +59,16 @@ function _loadForestLayers(listDiv) {
     toast('森林レイヤが読み込まれていません', 2500);
     return;
   }
+
+  // 🎨 カラーパレットボタン
+  if (window.openColorizePanel) {
+    var colorBtn = document.createElement('button');
+    colorBtn.textContent = '🎨 施業班を属性で色分け';
+    colorBtn.className = 'task-colorize-btn';
+    colorBtn.addEventListener('click', function() { window.openColorizePanel(); });
+    listDiv.appendChild(colorBtn);
+  }
+
   var currentGroup = null;
   _FOREST_LAYERS.forEach(function(lc) {
     var pm = window.pmLayers[lc.name];
