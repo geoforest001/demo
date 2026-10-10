@@ -53,10 +53,56 @@ function _clearTaskLayers(listDiv) {
   if (listDiv) listDiv.innerHTML = '';
 }
 
+/* 長野県_上伊那: _BRIDGE_LAYERS を業務レイヤとして表示 */
+function _loadBridgeLayers(listDiv) {
+  if (typeof _BRIDGE_LAYERS === 'undefined' || !_BRIDGE_LAYERS.length) {
+    toast('山地レイヤデータが未定義です', 2500);
+    return;
+  }
+  var chks = [];
+  _BRIDGE_LAYERS.forEach(function(def, idx) {
+    var row = document.createElement('label');
+    row.className = 'task-layer-row';
+    var chk = document.createElement('input');
+    chk.type = 'checkbox';
+    (function(d, i) {
+      chk.addEventListener('change', function() {
+        if (this.checked) d.layer.addTo(map);
+        else map.removeLayer(d.layer);
+        if (i === 4) {
+          var on = this.checked;
+          for (var ci = 5; ci <= 11; ci++) {
+            if (!chks[ci] || chks[ci].checked === on) continue;
+            chks[ci].checked = on;
+            chks[ci].dispatchEvent(new Event('change'));
+          }
+        }
+      });
+    })(def, idx);
+    chks[idx] = chk;
+    var swatch = document.createElement('span');
+    swatch.className = 'lgnd-swatch ' + (def.type === 'line' ? 'lgnd-line' : 'lgnd-poly');
+    swatch.style.background = def.color;
+    var txt = document.createElement('span');
+    txt.textContent = def.label;
+    row.appendChild(chk);
+    row.appendChild(swatch);
+    row.appendChild(txt);
+    listDiv.appendChild(row);
+    _taskActiveLayers.push(def.layer);
+  });
+  toast('長野県_上伊那 を読み込みました', 2000);
+}
+
 /* 業務を読み込む */
 async function _loadTask(taskId, listDiv) {
   _clearTaskLayers(listDiv);
   if (!taskId) return;
+
+  if (taskId === '長野県_上伊那') {
+    _loadBridgeLayers(listDiv);
+    return;
+  }
 
   var cfg;
   try {

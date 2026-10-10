@@ -679,55 +679,6 @@ function renderLayerControl() {
   /* ── 業務レイヤセレクター（森林レイヤと気象レイヤの間） ── */
   if (window.initTaskSelector) initTaskSelector(overlaysDiv);
 
-  /* ── 山地レイヤ セクション ── */
-  (function() {
-    var mtSep = document.createElement('div');
-    mtSep.className = 'leaflet-control-layers-separator';
-    var mtLbl = document.createElement('div');
-    mtLbl.className = 'lc-section-label lc-section-collapsed';
-    mtLbl.style.cssText = 'display:flex;align-items:center;cursor:pointer';
-    mtLbl.innerHTML = '<span class="lc-section-arrow">▾</span>&nbsp;山地レイヤ';
-    var mtDiv = document.createElement('div');
-    // 施業班（index 5）と子レイヤ（index 6-12）を後で参照するため先に収集
-    var chks = [];
-    _BRIDGE_LAYERS.forEach(function(def, idx) {
-      var row = document.createElement('label');
-      row.style.cssText = 'display:none;padding:2px 0 2px 4px;align-items:center;gap:4px';
-      var chk = document.createElement('input');
-      chk.type = 'checkbox';
-      chk.addEventListener('change', function() {
-        if (this.checked) def.layer.addTo(map);
-        else map.removeLayer(def.layer);
-        // 施業班（index 4）の変更で子レイヤ（5-11）を連動
-        if (idx === 4) {
-          var on = this.checked;
-          for (var ci = 5; ci <= 11; ci++) {
-            if (!chks[ci] || chks[ci].checked === on) continue;
-            chks[ci].checked = on;
-            chks[ci].dispatchEvent(new Event('change'));
-          }
-        }
-      });
-      chks[idx] = chk;
-      var swatch = document.createElement('span');
-      swatch.className = 'lgnd-swatch ' + (def.type === 'line' ? 'lgnd-line' : 'lgnd-poly');
-      swatch.style.background = def.color;
-      var txt = document.createElement('span');
-      txt.textContent = def.label;
-      row.append(chk, swatch, txt);
-      mtDiv.appendChild(row);
-    });
-    mtLbl.addEventListener('click', function() {
-      var collapsed = this.classList.toggle('lc-section-collapsed');
-      mtDiv.querySelectorAll('label').forEach(function(el) {
-        el.style.display = collapsed ? 'none' : '';
-      });
-    });
-    lcList.appendChild(mtSep);
-    lcList.appendChild(mtLbl);
-    lcList.appendChild(mtDiv);
-  })();
-
   if (window.innerWidth < 768) closePanel();
 }
 
