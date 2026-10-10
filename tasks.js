@@ -51,6 +51,7 @@ function _clearTaskLayers(listDiv) {
   });
   _taskActiveLayers = [];
   if (listDiv) listDiv.innerHTML = '';
+  window.attrActiveLayer = null;
 }
 
 /* 長野県_上伊那（市町村・国有林）: 森林レイヤを市町村グループ別に listDiv へ展開 */
@@ -109,9 +110,34 @@ function _loadForestLayers(listDiv) {
     var txt = document.createElement('span');
     txt.textContent = lc.name;
 
+    var attrWrap = document.createElement('span');
+    attrWrap.className = 'attr-chk-wrap';
+    var attrChk = document.createElement('input');
+    attrChk.type = 'checkbox';
+    attrChk.className = 'attr-chk';
+    attrChk.title = 'この属性を表示対象にする';
+    var attrTxt = document.createElement('span');
+    attrTxt.textContent = '属性';
+    attrTxt.className = 'attr-chk-txt';
+    (function(ac, name, ld) {
+      ac.addEventListener('change', function(e) {
+        e.stopPropagation();
+        if (this.checked) {
+          ld.querySelectorAll('.attr-chk').forEach(function(c) { if (c !== ac) c.checked = false; });
+          window.attrActiveLayer = name;
+        } else {
+          window.attrActiveLayer = null;
+        }
+      });
+      ac.addEventListener('click', function(e) { e.stopPropagation(); });
+    })(attrChk, lc.name, listDiv);
+    attrWrap.appendChild(attrChk);
+    attrWrap.appendChild(attrTxt);
+
     row.appendChild(chk);
     row.appendChild(swatch);
     row.appendChild(txt);
+    row.appendChild(attrWrap);
     listDiv.appendChild(row);
     _taskActiveLayers.push(pm.layer);
   });
