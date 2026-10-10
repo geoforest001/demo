@@ -10,12 +10,12 @@ window._bbsStart = function() {
      下の REPLACE_… を実際の値に書き換えてください
    ──────────────────────────────────────────────────────── */
 var firebaseConfig = {
-  apiKey:            'REPLACE_WITH_YOUR_API_KEY',
-  authDomain:        'REPLACE_WITH_YOUR_PROJECT_ID.firebaseapp.com',
-  projectId:         'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket:     'REPLACE_WITH_YOUR_PROJECT_ID.firebasestorage.app',
-  messagingSenderId: 'REPLACE_WITH_SENDER_ID',
-  appId:             'REPLACE_WITH_APP_ID'
+  apiKey:            'AIzaSyDbSR9c6yy8pImXh-i8nJ2mJuazZ_Zpcoo',
+  authDomain:        'fir-map-bbs.firebaseapp.com',
+  projectId:         'fir-map-bbs',
+  storageBucket:     'fir-map-bbs.firebasestorage.app',
+  messagingSenderId: '624579949991',
+  appId:             '1:624579949991:web:d9302bbbec8cab94097282'
 };
 
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
