@@ -568,8 +568,9 @@ function renderLayerControl() {
   /* ── オーバーレイ セクションラベル（折り畳み式） ── */
   if (Object.keys(overlayMaps).length > 0) {
     const ovLbl = document.createElement('div');
+    ovLbl.id = 'forestSectionLabel';
     ovLbl.className = 'lc-section-label lc-section-collapsed';
-    ovLbl.style.display = 'flex';
+    ovLbl.style.display = 'none';
     ovLbl.style.alignItems = 'center';
     ovLbl.style.justifyContent = 'space-between';
     ovLbl.innerHTML = '<div><span class="lc-section-arrow">▾</span> 森林レイヤ</div><button class="lc-colorize-btn" title="施業班を属性で色分け">🎨</button>';

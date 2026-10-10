@@ -51,6 +51,21 @@ function _clearTaskLayers(listDiv) {
   });
   _taskActiveLayers = [];
   if (listDiv) listDiv.innerHTML = '';
+
+  // 森林レイヤセクションを閉じて非表示
+  var fLbl = document.getElementById('forestSectionLabel');
+  if (fLbl) {
+    if (!fLbl.classList.contains('lc-section-collapsed')) {
+      fLbl.classList.add('lc-section-collapsed');
+      var odiv = fLbl.parentNode;
+      if (odiv) {
+        odiv.querySelectorAll(':scope > .lc-group-label, :scope > label').forEach(function(el) {
+          el.style.display = 'none';
+        });
+      }
+    }
+    fLbl.style.display = 'none';
+  }
 }
 
 /* 長野県_上伊那: _BRIDGE_LAYERS を業務レイヤとして表示 */
@@ -101,6 +116,13 @@ async function _loadTask(taskId, listDiv) {
 
   if (taskId === '長野県_上伊那') {
     _loadBridgeLayers(listDiv);
+    return;
+  }
+
+  if (taskId === '長野県_上伊那（市町村・国有林）') {
+    var fLbl = document.getElementById('forestSectionLabel');
+    if (fLbl) fLbl.style.display = 'flex';
+    toast('長野県_上伊那（市町村・国有林）を読み込みました', 2000);
     return;
   }
 
