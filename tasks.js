@@ -75,6 +75,7 @@ function _loadForestLayers(listDiv) {
     var pm = window.pmLayers[lc.name];
     if (!pm || !pm.layer) return;
 
+    // 市町村グループヘッダー
     if (lc.group !== currentGroup) {
       currentGroup = lc.group;
       var grpDiv = document.createElement('div');
@@ -84,15 +85,16 @@ function _loadForestLayers(listDiv) {
         var collapsed = this.classList.toggle('lc-group-collapsed');
         var el = this.nextElementSibling;
         while (el && !el.classList.contains('lc-group-label')) {
-          if (el.tagName === 'LABEL') el.style.display = collapsed ? 'none' : '';
+          if (el.classList.contains('forest-layer-row')) el.style.display = collapsed ? 'none' : 'flex';
           el = el.nextElementSibling;
         }
       });
       listDiv.appendChild(grpDiv);
     }
 
-    var row = document.createElement('label');
-    row.className = 'task-layer-row';
+    // レイヤ行（<div> で label の暗黙チェック挙動を回避）
+    var row = document.createElement('div');
+    row.className = 'task-layer-row forest-layer-row';
     row.style.display = 'none';
 
     var chk = document.createElement('input');
@@ -109,6 +111,9 @@ function _loadForestLayers(listDiv) {
 
     var txt = document.createElement('span');
     txt.textContent = lc.name;
+    txt.style.flex = '1';
+    // テキストをクリックしたら layer toggle を切り替え
+    txt.addEventListener('click', function() { chk.click(); });
 
     var attrWrap = document.createElement('span');
     attrWrap.className = 'attr-chk-wrap';
@@ -120,8 +125,7 @@ function _loadForestLayers(listDiv) {
     attrTxt.textContent = '属性';
     attrTxt.className = 'attr-chk-txt';
     (function(ac, name, ld) {
-      ac.addEventListener('change', function(e) {
-        e.stopPropagation();
+      ac.addEventListener('change', function() {
         if (this.checked) {
           ld.querySelectorAll('.attr-chk').forEach(function(c) { if (c !== ac) c.checked = false; });
           window.attrActiveLayer = name;
@@ -129,7 +133,6 @@ function _loadForestLayers(listDiv) {
           window.attrActiveLayer = null;
         }
       });
-      ac.addEventListener('click', function(e) { e.stopPropagation(); });
     })(attrChk, lc.name, listDiv);
     attrWrap.appendChild(attrChk);
     attrWrap.appendChild(attrTxt);
