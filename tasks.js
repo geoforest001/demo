@@ -54,99 +54,6 @@ function _clearTaskLayers(listDiv) {
   window.attrActiveLayer = null;
 }
 
-/* 長野県_上伊那（市町村・国有林）: 森林レイヤを市町村グループ別に listDiv へ展開 */
-function _loadForestLayers(listDiv) {
-  if (typeof _FOREST_LAYERS === 'undefined' || !window.pmLayers) {
-    toast('森林レイヤが読み込まれていません', 2500);
-    return;
-  }
-
-  // 🎨 カラーパレットボタン
-  if (window.openColorizePanel) {
-    var colorBtn = document.createElement('button');
-    colorBtn.textContent = '🎨 施業班を属性で色分け';
-    colorBtn.className = 'task-colorize-btn';
-    colorBtn.addEventListener('click', function() { window.openColorizePanel(); });
-    listDiv.appendChild(colorBtn);
-  }
-
-  var currentGroup = null;
-  _FOREST_LAYERS.forEach(function(lc) {
-    var pm = window.pmLayers[lc.name];
-    if (!pm || !pm.layer) return;
-
-    // 市町村グループヘッダー
-    if (lc.group !== currentGroup) {
-      currentGroup = lc.group;
-      var grpDiv = document.createElement('div');
-      grpDiv.className = 'lc-group-label lc-group-collapsed';
-      grpDiv.innerHTML = '<span class="lc-group-arrow">▾</span><span>' + currentGroup + '</span>';
-      grpDiv.addEventListener('click', function() {
-        var collapsed = this.classList.toggle('lc-group-collapsed');
-        var el = this.nextElementSibling;
-        while (el && !el.classList.contains('lc-group-label')) {
-          if (el.classList.contains('forest-layer-row')) el.style.display = collapsed ? 'none' : 'flex';
-          el = el.nextElementSibling;
-        }
-      });
-      listDiv.appendChild(grpDiv);
-    }
-
-    // レイヤ行（<div> で label の暗黙チェック挙動を回避）
-    var row = document.createElement('div');
-    row.className = 'task-layer-row forest-layer-row';
-    row.style.display = 'none';
-
-    var chk = document.createElement('input');
-    chk.type = 'checkbox';
-    (function(layer) {
-      chk.addEventListener('change', function() {
-        if (this.checked) layer.addTo(map); else map.removeLayer(layer);
-      });
-    })(pm.layer);
-
-    var swatch = document.createElement('span');
-    swatch.className = 'task-layer-sw';
-    swatch.style.background = lc.strokeColor || '#2e7d32';
-
-    var txt = document.createElement('span');
-    txt.textContent = lc.name;
-    txt.style.flex = '1';
-    // テキストをクリックしたら layer toggle を切り替え
-    txt.addEventListener('click', function() { chk.click(); });
-
-    var attrWrap = document.createElement('span');
-    attrWrap.className = 'attr-chk-wrap';
-    var attrChk = document.createElement('input');
-    attrChk.type = 'checkbox';
-    attrChk.className = 'attr-chk';
-    attrChk.title = 'この属性を表示対象にする';
-    var attrTxt = document.createElement('span');
-    attrTxt.textContent = '属性';
-    attrTxt.className = 'attr-chk-txt';
-    (function(ac, name, ld) {
-      ac.addEventListener('change', function() {
-        if (this.checked) {
-          ld.querySelectorAll('.attr-chk').forEach(function(c) { if (c !== ac) c.checked = false; });
-          window.attrActiveLayer = name;
-        } else {
-          window.attrActiveLayer = null;
-        }
-      });
-    })(attrChk, lc.name, listDiv);
-    attrWrap.appendChild(attrChk);
-    attrWrap.appendChild(attrTxt);
-
-    row.appendChild(chk);
-    row.appendChild(swatch);
-    row.appendChild(txt);
-    row.appendChild(attrWrap);
-    listDiv.appendChild(row);
-    _taskActiveLayers.push(pm.layer);
-  });
-  toast('長野県_上伊那（市町村・国有林）を読み込みました', 2000);
-}
-
 /* 長野県_上伊那: _BRIDGE_LAYERS を業務レイヤとして表示 */
 function _loadBridgeLayers(listDiv) {
   if (typeof _BRIDGE_LAYERS === 'undefined' || !_BRIDGE_LAYERS.length) {
@@ -198,10 +105,6 @@ async function _loadTask(taskId, listDiv) {
     return;
   }
 
-  if (taskId === '長野県_上伊那（市町村・国有林）') {
-    _loadForestLayers(listDiv);
-    return;
-  }
 
   var cfg;
   try {
