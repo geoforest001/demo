@@ -51,21 +51,61 @@ function _clearTaskLayers(listDiv) {
   });
   _taskActiveLayers = [];
   if (listDiv) listDiv.innerHTML = '';
+}
 
-  // 森林レイヤセクションを閉じて非表示
-  var fLbl = document.getElementById('forestSectionLabel');
-  if (fLbl) {
-    if (!fLbl.classList.contains('lc-section-collapsed')) {
-      fLbl.classList.add('lc-section-collapsed');
-      var odiv = fLbl.parentNode;
-      if (odiv) {
-        odiv.querySelectorAll(':scope > .lc-group-label, :scope > label').forEach(function(el) {
-          el.style.display = 'none';
-        });
-      }
-    }
-    fLbl.style.display = 'none';
+/* 長野県_上伊那（市町村・国有林）: 森林レイヤを市町村グループ別に listDiv へ展開 */
+function _loadForestLayers(listDiv) {
+  if (typeof _FOREST_LAYERS === 'undefined' || !window.pmLayers) {
+    toast('森林レイヤが読み込まれていません', 2500);
+    return;
   }
+  var currentGroup = null;
+  _FOREST_LAYERS.forEach(function(lc) {
+    var pm = window.pmLayers[lc.name];
+    if (!pm || !pm.layer) return;
+
+    if (lc.group !== currentGroup) {
+      currentGroup = lc.group;
+      var grpDiv = document.createElement('div');
+      grpDiv.className = 'lc-group-label lc-group-collapsed';
+      grpDiv.innerHTML = '<span class="lc-group-arrow">▾</span><span>' + currentGroup + '</span>';
+      grpDiv.addEventListener('click', function() {
+        var collapsed = this.classList.toggle('lc-group-collapsed');
+        var el = this.nextElementSibling;
+        while (el && !el.classList.contains('lc-group-label')) {
+          if (el.tagName === 'LABEL') el.style.display = collapsed ? 'none' : '';
+          el = el.nextElementSibling;
+        }
+      });
+      listDiv.appendChild(grpDiv);
+    }
+
+    var row = document.createElement('label');
+    row.className = 'task-layer-row';
+    row.style.display = 'none';
+
+    var chk = document.createElement('input');
+    chk.type = 'checkbox';
+    (function(layer) {
+      chk.addEventListener('change', function() {
+        if (this.checked) layer.addTo(map); else map.removeLayer(layer);
+      });
+    })(pm.layer);
+
+    var swatch = document.createElement('span');
+    swatch.className = 'task-layer-sw';
+    swatch.style.background = lc.strokeColor || '#2e7d32';
+
+    var txt = document.createElement('span');
+    txt.textContent = lc.name;
+
+    row.appendChild(chk);
+    row.appendChild(swatch);
+    row.appendChild(txt);
+    listDiv.appendChild(row);
+    _taskActiveLayers.push(pm.layer);
+  });
+  toast('長野県_上伊那（市町村・国有林）を読み込みました', 2000);
 }
 
 /* 長野県_上伊那: _BRIDGE_LAYERS を業務レイヤとして表示 */
@@ -120,9 +160,7 @@ async function _loadTask(taskId, listDiv) {
   }
 
   if (taskId === '長野県_上伊那（市町村・国有林）') {
-    var fLbl = document.getElementById('forestSectionLabel');
-    if (fLbl) fLbl.style.display = 'flex';
-    toast('長野県_上伊那（市町村・国有林）を読み込みました', 2000);
+    _loadForestLayers(listDiv);
     return;
   }
 
