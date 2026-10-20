@@ -682,6 +682,76 @@ function renderLayerControl() {
   if (window.innerWidth < 768) closePanel();
 }
 
+/* ─── GeoTIFF 任意CRS対応: GeoKey解析 + proj4定義生成 ─── */
+function _parseTiffCRS(buf) {
+  const dv  = new DataView(buf);
+  const le  = (dv.getUint8(0) === 0x49); // II = little-endian
+  let ifdOff = dv.getUint32(4, le);
+  const nEnt = dv.getUint16(ifdOff, le);
+  ifdOff += 2;
+
+  let scale = null, tp = null, gkdOff = null, gdblOff = null;
+  for (let i = 0; i < nEnt; i++) {
+    const pos  = ifdOff + i * 12;
+    const tag  = dv.getUint16(pos,   le);
+    const type = dv.getUint16(pos+2, le);
+    const voff = dv.getUint32(pos+8, le);
+    if (tag === 33550 && type === 12) { // ModelPixelScale (3 doubles)
+      scale = [dv.getFloat64(voff, le), dv.getFloat64(voff+8, le), dv.getFloat64(voff+16, le)];
+    } else if (tag === 33922 && type === 12) { // ModelTiepoint (6 doubles)
+      tp = [];
+      for (let j = 0; j < 6; j++) tp.push(dv.getFloat64(voff + j*8, le));
+    } else if (tag === 34735 && type === 3) { // GeoKeyDirectory
+      gkdOff = voff;
+    } else if (tag === 34736 && type === 12) { // GeoDoubleParams
+      gdblOff = voff;
+    }
+  }
+  if (!gkdOff || !scale || !tp) return null;
+
+  // GeoKeyDirectory: header[3] = NumberOfKeys
+  const nkeys = dv.getUint16(gkdOff + 6, le);
+  const km = {};
+  for (let i = 1; i <= nkeys; i++) {
+    const off  = gkdOff + i * 8;
+    const kId  = dv.getUint16(off,   le);
+    const kLoc = dv.getUint16(off+2, le);
+    const kCnt = dv.getUint16(off+4, le);
+    const kVal = dv.getUint16(off+6, le);
+    if (kLoc === 0) {
+      km[kId] = kVal; // inline SHORT
+    } else if (kLoc === 34736 && gdblOff !== null) {
+      const vals = [];
+      for (let j = 0; j < kCnt; j++)
+        vals.push(dv.getFloat64(gdblOff + (kVal + j) * 8, le));
+      km[kId] = kCnt === 1 ? vals[0] : vals;
+    }
+  }
+  return { km, scale, tp };
+}
+
+function _geokeyToProj4(km) {
+  const ELLPS = { 7019: 'GRS80', 6019: 'GRS80', 7030: 'WGS84', 7001: 'airy', 7004: 'bessel' };
+  const modelType = km[1024];
+  if (modelType === 2) return '+proj=longlat +datum=WGS84 +no_defs';
+  if (modelType !== 1) return null;
+
+  const trans = km[3075];
+  const lon0  = km[3080] ?? 0;  const lat0 = km[3081] ?? 0;
+  const fe    = km[3082] ?? 0;  const fn   = km[3083] ?? 0;
+  const k0    = km[3092] ?? 1;
+  const sp1   = km[3078];       const sp2  = km[3079];
+  const ellps = ELLPS[km[2056]] || 'WGS84';
+
+  if (trans === 1)  return `+proj=tmerc +lat_0=${lat0} +lon_0=${lon0} +k=${k0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  if (trans === 8)  return `+proj=lcc +lat_1=${sp1??lat0} +lat_0=${lat0} +lon_0=${lon0} +k_0=${k0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  if (trans === 9)  return `+proj=lcc +lat_1=${sp1} +lat_2=${sp2} +lat_0=${lat0} +lon_0=${lon0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  if (trans === 11) return `+proj=aea +lat_1=${sp1} +lat_2=${sp2} +lat_0=${lat0} +lon_0=${lon0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  if (trans === 17) return `+proj=merc +lat_ts=${sp1??0} +lon_0=${lon0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  if (trans === 24) return `+proj=stere +lat_0=${lat0} +lon_0=${lon0} +k=${k0} +x_0=${fe} +y_0=${fn} +ellps=${ellps} +units=m +no_defs`;
+  return null;
+}
+
 /* ─── GeoTIFF読込 ─── */
 let _geotiffLayer = null;
 let _geotiffPaneName = null;
@@ -704,8 +774,26 @@ async function _loadGeoTIFF(file) {
   try {
     const buf = await file.arrayBuffer();
     if (seq !== _geotiffSeq) return;
+    // CRS情報はparseGeorasterより先に読む（bufが転送される可能性があるため）
+    const crsInfo = _parseTiffCRS(buf);
     const georaster = await parseGeoraster(buf);
     if (seq !== _geotiffSeq) return;
+
+    // 未知の投影座標系（32767=ユーザー定義 or 未設定）をGeoKeyから再構築
+    const proj = georaster.projection;
+    const needsCustom = typeof proj4 !== 'undefined' && crsInfo && (
+      !proj || proj === 32767 || proj === 0 ||
+      (proj !== 4326 && proj !== 3857 && !proj4.defs('EPSG:' + proj))
+    );
+    if (needsCustom) {
+      const p4str = _geokeyToProj4(crsInfo.km);
+      if (p4str) {
+        proj4.defs('EPSG:900001', p4str);
+        georaster.projection = 900001;
+        console.info('[GeoTIFF] custom CRS registered:', p4str);
+      }
+    }
+
     const paneName = `gtPane_${seq}`;
     map.createPane(paneName).style.zIndex = '250';
     _geotiffPaneName = paneName;
