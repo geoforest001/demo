@@ -1782,16 +1782,18 @@ function _onClearPhotos() {
 }
 
 // 画像ファイルのみを捕捉する capture フェーズリスナー（既存D&Dの前に実行）
+// ※ image/tiff は GeoTIFF として扱うため除外
 (function() {
   const mapEl = map.getContainer();
+  const isPhoto = i => i.type.startsWith('image/') && i.type !== 'image/tiff';
   mapEl.addEventListener('dragover', e => {
-    if ([...e.dataTransfer.items].some(i => i.kind === 'file' && i.type.startsWith('image/'))) {
+    if ([...e.dataTransfer.items].some(i => i.kind === 'file' && isPhoto(i))) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
     }
   }, true);
   mapEl.addEventListener('drop', async e => {
-    const imgFiles = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+    const imgFiles = [...e.dataTransfer.files].filter(f => isPhoto(f));
     if (!imgFiles.length) return;
     e.preventDefault();
     e.stopPropagation();
